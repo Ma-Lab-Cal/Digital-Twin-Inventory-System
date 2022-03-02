@@ -9,6 +9,14 @@
       font-weight: bold;
       color: #000066;
     }
+
+    .search-result {
+      padding: 0.2rem;
+      cursor: pointer;
+    }
+    .search-result:hover {
+      background: #EEEEEE;
+    }
   </style>
 </head>
 <body>
@@ -35,6 +43,28 @@
     
 
     var raw_entries = [
+      "Raspberry Pi 4 Computer Model B",
+      "Adafruit FT232H Breakout - General Purpose USB to GPIO, SPI, I2C - USB C & Stemma QT",
+      "Adafruit Feather M4 Express - Featuring ATSAMD51 - ATSAMD51 Cortex M4",
+      "Adafruit LSM6DS33 + LIS3MDL - 9 DoF IMU with Accel / Gyro / Mag - STEMMA QT Qwiic",
+      "Adafruit BMP280 I2C or SPI Barometric Pressure & Altitude Sensor - STEMMA QT",
+      "Adafruit LIS2MDL Triple Axis Magnetometer",
+      "Adafruit AirLift FeatherWing – ESP32 WiFi Co-Processor",
+      "Adafruit Ethernet FeatherWing",
+      "Adafruit Triple-axis Magnetometer - LIS3MDL - STEMMA QT / Qwiic",
+      "Adafruit Feather STM32F405 Express",
+      "Adafruit Feather nRF52840 Express",
+      "NeoPixel FeatherWing - 4x8 RGB LED Add-on For All Feather Boards",
+      "Adafruit DS3231 Precision RTC Breakout",
+      "Adafruit 9-DOF LSM9DS1 Breakout Board - STEMMA QT / Qwiic",
+      "Triple-axis Accelerometer+Magnetometer (Compass) Board - LSM303",
+      "Assembled Adafruit FeatherWing OLED - 128x32 OLED Add-on For Feather",
+      "Adafruit BME680 - Temperature, Humidity, Pressure and Gas Sensor - STEMMA QT",
+      "Adafruit MCP4728 Quad DAC with EEPROM - STEMMA QT / Qwiic",
+      "ADS1115 16-Bit ADC - 4 Channel with Programmable Gain Amplifier",
+      "WitMotion High-Precision RM3100 Military-grade Magnetometer Sensor Magnetic Field Module Digital Electronic Compass For MCU",
+      "Adafruit ItsyBitsy nRF52840 Express - Bluetooth LE",
+      "Adafruit Feather nRF52840 Sense",
       "CP30Q CP30Q: 30 mm to 30 mm Cage System Snap-On Right-Angle Adapter",
       "CSNK100: Kinematic Nosepiece for 1 Objective, M32 x 0.75 Threads, 60 mm Cage Compatible",
       "RM1FA: 1\" Construction Cube with 8-32 Tapped Holes",
@@ -103,7 +133,7 @@
       if (!words) {
         autofill.innerHTML = "";
         for (let n=0; n<entries.length; n+=1) {
-          autofill.innerHTML += "<div>" + raw_entries[n] + "</div>";
+          autofill.innerHTML += "<div class=\"search-result\">" + raw_entries[n] + "</div>";
         }
 
         return;
@@ -129,7 +159,7 @@
 
       autofill.innerHTML = "";
       for (let i=0; i<autofill_results.length; i+=1) {
-        autofill.innerHTML += "<div>" + autofill_results[i] + "</div>";
+        autofill.innerHTML += "<div class=\"search-result\">" + autofill_results[i] + "</div>";
       }
 
     }
