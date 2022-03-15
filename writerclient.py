@@ -25,7 +25,53 @@ while True:
     try:
         buffer = s.recv(1024)
     except (ConnectionResetError, ConnectionAbortedError):
+
+        ## error reporting
+        import datetime
+        from smtplib import SMTP_SSL as SMTP
+        from email.mime.text import MIMEText
+        from email.utils import formataddr
+
+        content = """
+        content: Writer Client cannot connect to server
+        datetime: {0}
+        """.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+
+        msg = MIMEText(content, "plain")
+        msg["Subject"] = "[Ma Lab Env Sys]: [Error]: Server Down!"
+        msg["From"] = formataddr(("MaLabBot", "tk@uncertainty.email"))
+
+        conn = SMTP("hwsmtp.exmail.qq.com")
+        conn.login("tk@uncertainty.email", "bGGzXR4Ndo4a4Erf")
+        conn.sendmail("tk@uncertainty.email", ["tk.uncertainty@gmail.com"], msg.as_string())
+        conn.quit()
+
+        print("[Ma Lab Env Sys]: [Error]: Server Down! reported to admin")
+
+        time.sleep(10)
+
+        ## END error reporting
+
         s = resetConnection()
+
+        
+        ## error reporting
+        content = """
+        content: Writer Client establish server connection
+        datetime: {0}
+        """.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+
+        msg = MIMEText(content, "plain")
+        msg["Subject"] = "[Ma Lab Env Sys]: [Info]: Server Back Online"
+        msg["From"] = formataddr(("MaLabBot", "tk@uncertainty.email"))
+
+        conn = SMTP("hwsmtp.exmail.qq.com")
+        conn.login("tk@uncertainty.email", "bGGzXR4Ndo4a4Erf")
+        conn.sendmail("tk@uncertainty.email", ["tk.uncertainty@gmail.com"], msg.as_string())
+        conn.quit()
+        print("[Ma Lab Env Sys]: [Info]: Server Back Online reported to admin")
+        ## END error reporting
+
         continue
     
     if not buffer:
