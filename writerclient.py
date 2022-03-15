@@ -1,8 +1,8 @@
 import json
 import socket
 import time
+import datetime
 
-import random
 
 def resetConnection():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -32,11 +32,12 @@ while True:
         continue
     
     data = json.loads(buffer.decode())
-    with open("data/record.csv", "a", encoding="utf-8") as f:
+    with open("data/{0}.csv".format(datetime.datetime.now().strftime("%Y-%m-%d")), "a", encoding="utf-8") as f:
         entry = data.get("params")
-        csv_entry = "{timestamp},{temperature}".format(
-            timestamp=entry.get("timestamp"), 
-            temperature=entry.get("temperature")
+        csv_entry = "{timestamp},{temperature},{humidity}".format(
+            timestamp=entry.get("/node0/timestamp"), 
+            temperature=entry.get("/node0/temperature"),
+            humidity=entry.get("/node0/humidity"),
             )
         f.write(csv_entry + "\n")
 
