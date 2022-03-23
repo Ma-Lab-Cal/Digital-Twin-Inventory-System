@@ -8,8 +8,8 @@ class FlamingoSocket:
         self.n_connections = n_connections
 
         self.handlers = {
-            "SET": self.default_set,
-            "GETALL": self.default_getAll,
+            "set": self.default_set,
+            "getall": self.default_getAll,
         }
 
         self.nt = {}
@@ -51,7 +51,7 @@ class FlamingoSocket:
                 break
             
             data = json.loads(buffer.decode())
-            func = self.handlers.get(data.get("func").upper())
+            func = self.handlers.get(data.get("func").lower())
 
             if not func:
                 conn.send(b"NACK")
@@ -59,7 +59,7 @@ class FlamingoSocket:
 
             ret = func(data.get("params"))
 
-            conn.send(json.dumps({"func": "return", "params": ret}).encode())
+            conn.send(json.dumps({"func": "ret", "params": ret}).encode())
                 
             print("nt:", self.nt)
             
