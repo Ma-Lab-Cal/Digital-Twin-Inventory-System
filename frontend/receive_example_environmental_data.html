@@ -37,12 +37,12 @@
     ws.onmessage = function (e) {
       var data = e.data;
       data = JSON.parse(data);
-      console.log("recv");
+      // console.log("recv");
       console.log(data);
 
-      env_data[0].x.push(data["/timestamp"]);
+      env_data[0].x.push(data["/node0/timestamp"]);
       env_data[0].y.push(data["/node0/temperature"]);
-      env_data[1].x.push(data["/timestamp"]);
+      env_data[1].x.push(data["/node0/timestamp"]);
       env_data[1].y.push(data["/node1/temperature"]);
 
       env_data[0].x = env_data[0].x.slice(-600);

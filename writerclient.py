@@ -2,6 +2,7 @@ import json
 import socket
 import time
 import datetime
+import os
 
 
 def resetConnection():
@@ -78,12 +79,33 @@ while True:
         continue
     
     data = json.loads(buffer.decode())
-    with open("data/{0}.csv".format(datetime.datetime.now().strftime("%Y-%m-%d")), "a", encoding="utf-8") as f:
+    folder_path = "H:\\Shared drives\\Ma Lab SPA\\Test-EnvData\\"
+    with open(os.path.join(folder_path, "{0}_node0.csv".format(datetime.datetime.now().strftime("%Y-%m-%d"))), "a", encoding="utf-8") as f:
         entry = data.get("params")
-        csv_entry = "{timestamp},{temperature},{humidity}".format(
+        csv_entry = "{timestamp},{temperature},{humidity},{barometric},{pm1_0},{pm2_5},{pm10},{particles_0_3_um},{particles_1_um},{particles_10_um},{lux},{magnetic_x},{magnetic_y},{magnetic_z}".format(
             timestamp=entry.get("/node0/timestamp"), 
             temperature=entry.get("/node0/temperature"),
             humidity=entry.get("/node0/humidity"),
+            barometric=-1,
+            pm1_0=entry.get("/node0/pm1_0"),
+            pm2_5=entry.get("/node0/pm2_5"),
+            pm10=entry.get("/node0/pm10"),
+            particles_0_3_um=entry.get("/node0/particles_0_3_um"),
+            particles_1_um=entry.get("/node0/particles_1_um"),
+            particles_10_um=entry.get("/node0/particles_10_um"),
+            lux=entry.get("/node0/lux"),
+            magnetic_x=entry.get("/node0/magnetic_x"),
+            magnetic_y=entry.get("/node0/magnetic_y"),
+            magnetic_z=entry.get("/node0/magnetic_z"),
+            )
+        f.write(csv_entry + "\n")
+    
+    with open(os.path.join(folder_path, "{0}_node1.csv".format(datetime.datetime.now().strftime("%Y-%m-%d"))), "a", encoding="utf-8") as f:
+        entry = data.get("params")
+        csv_entry = "{timestamp},{temperature},{humidity}".format(
+            timestamp=entry.get("/node0/timestamp"), 
+            temperature=entry.get("/node1/temperature"),
+            humidity=entry.get("/node1/humidity"),
             )
         f.write(csv_entry + "\n")
 

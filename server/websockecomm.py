@@ -1,29 +1,26 @@
 import time
+import json
 
-from flamingo import FlamingoWS
+from flamingo import FlamingoNT
 
 
 
 
-app = FlamingoWS(("0.0.0.0", 8000))
+app = FlamingoNT(("0.0.0.0", 8000))
 
 
 def echoHandler(stream):
     while not app.is_stopped():
-        print("handle!")
         data = stream.receive()
-        print(data)
-        stream.transmit(data)
-    
-print("tes")
+        print("ws conn:", data)
+        resp_data = app.getNT()
+        print("ws resp:", resp_data)
+        stream.transmit(json.dumps(resp_data).encode())
 
+
+# add websocket handler interface
 app.addSocketHandler("/ws", echoHandler)
 
 app.run()
 
-while True:
-    try:
-        print("main loop")
-        time.sleep(2)
-    except KeyboardInterrupt:
-        app.stop()    
+print("App quit.")
