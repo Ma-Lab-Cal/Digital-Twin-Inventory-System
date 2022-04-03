@@ -5,6 +5,9 @@ import datetime
 import os
 
 
+time.sleep(5)
+
+
 def resetConnection():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     is_connected = False

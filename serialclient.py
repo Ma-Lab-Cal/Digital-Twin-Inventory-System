@@ -6,6 +6,8 @@ import random
 
 import serial
 
+time.sleep(5)
+
 ser = serial.Serial("COM3", baudrate=115200, timeout=2)
 
 def resetConnection():
