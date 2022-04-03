@@ -6,6 +6,7 @@ import struct
 import threading
 import json
 import logging
+import time
 
 # ==========================
 
@@ -35,10 +36,9 @@ class FlamingoNT:
         
         self.nt = {}
 
-        self._is_stopped = False
+        self._stop = threading.Event()
         
         self._s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
         self._s.bind(self.addr)
         self._s.listen(self.n_connections)
         self._s.settimeout(1)
@@ -56,9 +56,10 @@ class FlamingoNT:
         
         self.handlers[uri] = handler
 
-    def handleConnection(self, conn, addr):
+    def handleConnection(self, conn, addr, _stop):
         logging.debug("Handling connection {addr}".format(addr=addr))
-
+        conn.settimeout(1)
+        
         # handle as normal HTTP request
         request = Request(conn)
 
@@ -97,7 +98,7 @@ class FlamingoNT:
                 # switch protocol
                 conn.send(upgrade_response)
 
-                func(Stream(conn))
+                func(WebSocketStream(conn))
 
         # handle pure socket conn
         else:
@@ -107,28 +108,18 @@ class FlamingoNT:
             # we already read from conn for the first package, so handle it directly
             buffer = request._buffer
 
-
             while True:
-                while not buffer:
-                    if self._is_stopped:
-                        conn.close()
-                        logging.info("Socket client session stopped.")
-                        return
-                    
-                    try:
-                        buffer = request.receive(timeout=60)
-                    except (ConnectionResetError, socket.timeout) as e:
-                        print(e)
-                        logging.info("Client disconnected.")
-                        conn.close()
-                        return
-                
+
+                if not buffer:
+                    break
+
                 data = buffer.decode()
                 buffer = b""
 
                 try:
                     data = json.loads(data)
-                except JSONDecodeError:
+                except json.JSONDecodeError:
+                    logging.error("JSON decode error: {data}".format(data=data))
                     continue
                     
                 logging.debug("received: {data}".format(data=data))
@@ -142,7 +133,8 @@ class FlamingoNT:
 
                     conn.send(json.dumps({"func": "ret", "params": ret}).encode())
                 
-
+                buffer = Stream.receivePacket(conn)
+                
 
         conn.close()
         logging.info("Socket client session stopped.")
@@ -150,26 +142,28 @@ class FlamingoNT:
 
     def run(self):
         logging.info("Connection acceptance service started.")
-        while not self._is_stopped:
-            try:
-                try:
-                    conn, addr = self._s.accept()
-                except TimeoutError:
-                    continue
-
-                t = threading.Thread(target=self.handleConnection, args=(conn, addr))
+        try:
+            while not self._stop.is_set():
+                while not self._stop.is_set():
+                    try:
+                        conn, addr = self._s.accept()
+                    except socket.timeout:
+                        continue
+                    break
+                t = threading.Thread(target=self.handleConnection, args=(conn, addr, self._stop))
                 t.start()
-            except KeyboardInterrupt:
-                self.stop()
+
+        except KeyboardInterrupt:
+            self.stop()
         
         logging.info("Connection acceptance service stopped.")
     
     def is_stopped(self):
-        return self._is_stopped 
+        return self._stop.is_set() 
 
     def stop(self):
         logging.info("Stopping server...")
-        self._is_stopped = True
+        self._stop.set()
     
     def default_set(self, params):
         for key in params:
@@ -182,6 +176,58 @@ class FlamingoNT:
     def getNT(self):
         return self.nt
 
+
+class Stream:
+    @staticmethod
+    def receive(conn, size, timeout=60):
+        target_timeout = time.time() + timeout
+        conn.settimeout(.5)
+        
+        while True:
+            try:
+                buffer = conn.recv(size)
+            except (socket.timeout, ConnectionResetError, ConnectionAbortedError):
+                if time.time() < target_timeout:
+                    continue
+                return b""
+            
+            if buffer == b"":
+                if time.time() < target_timeout:
+                    continue
+                return b""
+
+            return buffer
+           
+    @staticmethod 
+    def transmit(conn, data):
+        conn.settimeout(.5)
+
+        try:
+            conn.sendall(data)
+        except (ConnectionResetError, ConnectionAbortedError):
+            return False
+        return True
+        
+    @staticmethod
+    def receivePacket(conn):
+        c = b""
+        buffer = b""
+
+        while c != b"\x0A":
+            buffer += c
+            c = Stream.receive(conn, 1)
+            
+            # if remote closes connection, we will not get timeout, but empty data
+            if c == b"":
+                return buffer
+        
+        return buffer
+
+    @staticmethod
+    def transmitPacket(conn, data):
+        Stream.transmit(conn, data + b"\n")
+
+
 class Request:
     def __init__(self, conn):
         self.method = ""
@@ -193,32 +239,25 @@ class Request:
         self._conn = conn
         self._buffer = b""
     
-    def receive(self, frame_size=1024, timeout=1):
-        self._conn.settimeout(timeout)
-        buffer = self._conn.recv(frame_size)
-
-        if len(buffer) == frame_size:
-            # there may be remaining data
-            # we then use timeout method to try to receive all the data
+    def receive(self, frame_size=1024):
+        buffer = b""
+        while True:
             try:
-                self._conn.settimeout(.02)
-                b = self._conn.recv(frame_size)
-            except socket.timeout:
+                buf = self._conn.recv(frame_size)
+            except (socket.timeout, ConnectionResetError, ConnectionAbortedError):
                 return buffer
-        
-            while b:
-                buffer += b
-                try:
-                    self._conn.settimeout(.02)
-                    b = self._conn.recv(frame_size)
-                except socket.timeout:
-                    b = b""
-            
-        return buffer
+
+            if buf == b"":
+                return buffer
+
+            buffer += buf
+
+            if len(buf) < frame_size:
+                return buffer
 
     def parseHTTPRequest(self):
         # receive all data
-        buffer = self.receive(timeout=60)
+        buffer = self.receive()
         self._buffer = buffer
 
         # detect if this is really a HTTP request
@@ -243,24 +282,27 @@ class Request:
 
         return True
 
-class Stream:
-    def __init__(self, conn):
+class WebSocketStream:
+    def __init__(self, conn, timeout=60):
         self.conn = conn
-    
+        self.conn.settimeout(1)
+        self.timeout = timeout
+
     def receive(self):
-        frame_header, = struct.unpack(">B", self.conn.recv(1))
+        frame_header, = struct.unpack(">B", Stream.receive(self.conn, 1))
         fin = (frame_header >> 7) & 0b1
         opcode = (frame_header >> 0) & 0b1111
         
-        frame_header, = struct.unpack(">B", self.conn.recv(1))
+        frame_header, = struct.unpack(">B", Stream.receive(self.conn, 1))
         mask = (frame_header >> 7) & 0b1
 
         # Decoding Payload Length
         payload_len = (frame_header >> 0) & 0b1111111
 
-        if payload_len > 125:
-            pass
-
+        if payload_len == 126:
+            payload_len, = struct.unpack(">H", Stream.receive(self.conn, 2))
+        elif payload_len == 127:
+            payload_len, = struct.unpack(">Q", Stream.receive(self.conn, 8))
 
         #print(fin, opcode, mask, payload_len)
         # Reading and Unmasking the Data
@@ -271,9 +313,9 @@ class Stream:
             conn.close()
             return
 
-        masking_key = self.conn.recv(4)
+        masking_key = Stream.receive(self.conn, 4)
 
-        raw_content = self.conn.recv(payload_len)
+        raw_content = Stream.receive(self.conn, payload_len)
 
         content = b""
         for i in range(payload_len):
@@ -292,6 +334,6 @@ class Stream:
             frame_header = struct.pack(">BBH", (fin << 7) | opcode, 126, payload_len)
         else:
             frame_header = struct.pack(">BBQ", (fin << 7) | opcode, 127, payload_len)
-        self.conn.send(frame_header)
-        self.conn.send(buffer)
+        Stream.transmit(self.conn, frame_header)
+        Stream.transmit(self.conn, buffer)
         

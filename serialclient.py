@@ -8,23 +8,9 @@ import serial
 
 time.sleep(5)
 
-ser = serial.Serial("COM3", baudrate=115200, timeout=2)
+ser = serial.Serial("COM3", baudrate=115200, timeout=1)
 
-def resetConnection():
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    is_connected = False
-
-    while not is_connected:
-        try:
-            s.connect(("127.0.0.1", 8000))
-        except ConnectionRefusedError:
-            print("retrying...")
-            continue
-        is_connected = True
-    
-    return s
-
-s = resetConnection()
+data = {}
 
 while True:
     c = ser.read()
@@ -35,7 +21,6 @@ while True:
     
     if not buffer:
         continue
-    
     try:
         data = json.loads(buffer.decode())
     except json.decoder.JSONDecodeError as e:
@@ -45,13 +30,24 @@ while True:
     print(data)
         
     data["/node0/timestamp"] = time.time()
+    
     print("sending data")
-    s.send(json.dumps({"func": "set", "params": data}).encode())
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    while True:
+        try:
+            s.connect(("127.0.0.1", 8000))
+        except ConnectionRefusedError:
+            print("retrying...")
+            continue
+        break
+
+    s.sendall(json.dumps({"func": "set", "params": data}).encode() + b"\n")
     
     print("reading response")
     try:
         data = s.recv(1024)
     except ConnectionResetError:
-        s = resetConnection()
         continue
     print(data)
+    s.close()

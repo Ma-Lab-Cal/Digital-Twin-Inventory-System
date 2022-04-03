@@ -1,0 +1,1 @@
+py C:\Users\ma-la\Documents\Digital-Twin-Inventory-System\server\Inventory_server.py

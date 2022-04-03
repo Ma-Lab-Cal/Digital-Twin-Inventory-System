@@ -1,0 +1,575 @@
+/*Global*/
+body{
+  background-color: white;
+  color: black;
+  font-family: Arial, Helvrtica, sans-serif;
+  font-size: 20px;
+  line-height: 1.5em;
+  margin: 0;
+}
+
+a{
+  text-decoration: none;
+  color: red;
+}
+
+a:hover{
+  color: blue;
+}
+
+a:active{
+  color: orange;
+}
+
+h1{
+  font-size: 30px;
+}
+/*Global*/
+
+
+
+/*Head & Foot*/
+header{
+  padding-top: 20px;
+  height: 0px;
+}
+
+footer{
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  height: 0px;
+}
+
+#footerControl{
+  position: relative;
+  min-height: 100vh;
+}
+
+#footerHelp{
+  padding-bottom: 40px;
+}
+/*Head & Foot*/
+
+
+
+/*Columns*/
+.row{
+  width: 95vw;
+  margin: auto;
+  overflow: hidden;
+}
+
+.row:after{
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.column#flrPlan{
+  display: inline-block;
+  float: left;
+  width: 35vw;
+}
+
+.column#eqpList{
+  display: inline-block;
+  float: left;
+  width: 30vw;
+}
+
+.column#envPlot{
+  display: inline-block;
+  float: right;
+  width: 25vw;
+}
+
+@media(max-width:1200px){
+  .column#flrPlan{
+    width: 35vw;
+  }
+
+  .column#eqpList{
+    width: 30vw;
+  }
+
+  .column#envPlot{
+    width: 20vw;
+  }
+}
+
+@media(max-width:600px){
+  .column#flrPlan{
+    width: 35vw;
+  }
+
+  .column#eqpList{
+    width: 25vw;
+  }
+
+  .column#envPlot{
+    width: 20vw;
+  }
+}
+/*Columns*/
+
+
+
+/*Scrollbar*/
+.dropDownList{
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-bottom-color: midnightblue;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: midnightblue;
+  max-height: 75vh;
+  overflow: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 15px;
+  display: none;
+}
+
+.dropDownList::-webkit-scrollbar {
+  width: 10px;
+  display: initial;
+}
+
+::-webkit-scrollbar-track{
+  background-color: lightslategray;
+}
+
+::-webkit-scrollbar-thumb{
+  background-color: darkslategray;
+  border-radius: 5px;
+  border: 2.5px solid slategray;
+}
+/*Scrollbar*/
+
+
+
+/*Search Bar*/
+input[type=search]{
+  height: 30px;
+  width: 84%;
+  padding: 5px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: gainsboro;
+}
+
+button.search{
+  height: 30px;
+  width: 15%;
+  float: right;
+  padding: 5px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  background: transparent;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 15px;
+}
+
+button.search:hover{
+  background: lightgrey;
+}
+
+button.search:active{
+  background: lightblue;
+}
+
+.highlight{
+  font-weight: bold;
+  color: magenta;
+}
+
+.search-result{
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-bottom-color: midnightblue;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding: 5px;
+  cursor: pointer;
+}
+
+.search-result:hover{
+  background: mintcream;
+}
+/*Search Bar*/
+
+
+
+/*Floor Plan*/
+button.return{
+  margin-bottom: 10px;
+  height: 30px;
+  width: 25%;
+  float: left;
+  padding: 5px;
+  margin-left: 5%;
+  background: beige;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+}
+
+button.return:hover{
+  background: khaki;
+}
+
+button.return:active{
+  background: yellow;
+}
+
+#flrPlan{
+  padding: 10px;
+}
+
+.image{
+  width: 100%;
+  height: auto;
+}
+/*Floor Plan*/
+
+
+
+/*Equipment List*/
+#eqpList{
+  padding: 10px;
+}
+
+#eqpList h1{
+  text-align: left;
+}
+
+#eqpList a{
+  color: black;
+}
+
+#eqpList a:hover{
+  color: blue;
+}
+
+#eqpList a:active{
+  color: orange;
+}
+
+#eqpList ul{
+  width: 100%;
+  display: none;
+  padding: 0;
+  margin: 0;
+  float: left;
+}
+
+#eqpList ul.dropDownList{
+  display: block;
+  background-color: #4c5f7a;
+}
+
+#eqpList li{
+  padding: 5px 0px;
+  width: 100%;
+  float: left;
+  clear: left;
+  display: inline;
+  position: relative;
+  list-style: none;
+}
+
+#eqpList ul.subList{
+  background-color: #393e6f;
+  position: relative;
+  left: 0;
+  top: 100%;
+  display: none;
+}
+
+#eqpList ul.subsubList{
+  background-color: #3d2e4f;
+  position: relative;
+  left: 0;
+  top: 100%;
+  display: none;
+}
+
+button.add{
+  position: absolute;
+  height: 30px;
+  width: 100px;
+  padding: 5px;
+  margin-top: 10px;
+  background: beige;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+}
+
+button.add:hover{
+  background: lavender;
+}
+
+button.add:active{
+  background: plum;
+}
+
+button.clkdadd{
+  position: absolute;
+  height: 30px;
+  width: 100px;
+  float: left;
+  padding: 5px;
+  margin-top: 10px;
+  background: red;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+}
+
+button.clkdadd:hover{
+  background: salmon;
+}
+
+button.clkdadd:active{
+  background: plum;
+}
+
+button.edit{
+  position: absolute;
+  height: 30px;
+  width: 100px;
+  padding: 5px;
+  margin-top: 10px;
+  margin-left: 125px;
+  background: beige;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+}
+
+button.edit:hover{
+  background: antiquewhite;
+}
+
+button.edit:active{
+  background: orange;
+}
+
+button.clkdedit{
+  position: absolute;
+  height: 30px;
+  width: 100px;
+  float: left;
+  padding: 5px;
+  margin-top: 10px;
+  margin-left: 125px;
+  background: red;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+}
+
+button.clkdedit:hover{
+  background: salmon;
+}
+
+button.clkdedit:active{
+  background: orange;
+}
+
+#eqpInfo{
+  display: block;
+  padding-left: 20px;
+  padding-right: 30px;
+  background: whitesmoke;
+}
+
+#eqpInfo label{
+  display: block;
+  padding-bottom: 5px;
+}
+
+form#eqpInfo{
+  position: relative;
+  margin-top: 50px;
+}
+
+input[type=text]{
+    height: 20px;
+    width: 100%;
+    padding: 5px;
+    font-size: 20px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: none
+}
+
+textarea{
+    height: 60px;
+    width: 100%;
+    padding: 5px;
+    font-size: 20px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: none
+}
+
+button.submit{
+  margin-bottom: 10px;
+  height: 30px;
+  width: 25%;
+  padding: 5px;
+  background: beige;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+}
+
+button.submit:hover{
+  background: palegreen;
+}
+
+button.submit:active{
+  background: lime;
+}
+
+#editInfo{
+  padding-top: 10px;
+  display: block;
+  padding-left: 20px;
+  padding-right: 30px;
+  background: whitesmoke;
+}
+
+#editInfo label{
+  display: block;
+  padding-bottom: 5px;
+}
+
+form#editInfo{
+  position: relative;
+  margin-top: 50px;
+}
+/*Equipment List*/
+
+
+
+/*Environmental Plot*/
+#envPlot{
+  padding: 10px;
+}
+
+.plots{
+  margin-top: 10px;
+}
+
+button.history{
+  margin-top: 5px;
+  margin-right: 40%;
+  height: 30px;
+  width: 25%;
+  float: left;
+  padding: 5px;
+  margin-left: 5%;
+  background: beige;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+}
+
+button.history:hover{
+  background: powderblue;
+}
+
+button.history:active{
+  background: aqua;
+}
+
+button.clkdhistory{
+  margin-top: 5px;
+  margin-right: 40%;
+  height: 30px;
+  width: 25%;
+  float: left;
+  padding: 5px;
+  margin-left: 5%;
+  background: red;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+}
+
+button.clkdhistory:hover{
+  background: salmon;
+}
+
+button.clkdhistory:active{
+  background: aqua;
+}
+
+#plotFunc{
+  display: block;
+  padding-left: 20px;
+  padding-right: 30px;
+  background: whitesmoke;
+}
+
+#plotFunc label{
+  display: block;
+  padding-bottom: 5px;
+}
+
+form#plotFunc{
+  position: relative;
+  margin-top: 50px;
+}
+
+button.download{
+  margin-bottom: 10px;
+  height: 30px;
+  width: 30%;
+  padding: 5px;
+  background: beige;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+}
+
+button.download:hover{
+  background: pink;
+}
+
+button.download:active{
+  background: deeppink;
+}
+/*Environmental Plot*/
+
+
+
+/*Circle*/
+.circle {
+  font-size: 10px;
+  color: blue;
+  height: 20px;
+  width: 20px;
+  background-color: red;
+  border-radius: 50%;
+}
+/*Circle*/
+
+
+
+
+
+
+
+
+

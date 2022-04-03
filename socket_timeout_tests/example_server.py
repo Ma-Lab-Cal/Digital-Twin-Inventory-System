@@ -36,6 +36,7 @@ class SimpleServer:
 
     def connectionHandler(self, conn, addr, _stop):
         print("<handler> started with addr:", addr)
+        conn.settimeout(1)
         while not _stop.is_set():
             data = SimpleServer.receive(conn)
             
@@ -58,7 +59,6 @@ class SimpleServer:
                         # print("<server> accept() timeout")
                         continue
                     break
-                conn.settimeout(5)
 
                 t = threading.Thread(target=self.connectionHandler, args=(conn, addr, self._stop))
                 t.start()

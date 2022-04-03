@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Digital Twin of Ma Lab</title>
+		<link rel="stylesheet" type="text/css" href="/static/css/style.css">
+	</head>
+	<body>
+		<div id="footerControl">
+			<div id="footerHelp">
+				<header>
+				</header>
+				<div class="row">
+					<div id="flrPlan" class="column">
+						<h1 class="location">Main Floor Plan</h1>
+						<button type="button" class="return" onclick="return changeImage('/static/img/Plan 00.png')">Return</button>
+						<img src="/static/img/Plan 00.png" class="image">
+					</div> <!-- flrPlan -->
+					<div id="eqpList" class="column">
+						<h1>Equipment List</h1>
+						<form action="process.php" method="POST">
+							<input type="search" name="search" placeholder="Search..." id="searchbar">
+							<button type="submit" class="search" onclick="return false">🔍</button>
+							<div id="autofill" class="dropDownList" onmouseover="this.style.overflow='auto'" onmouseout="this.style.overflow='hidden'"></div>
+						</form>
+						<button type="button" class="add" onclick="addEqp()">Add</button>
+						<button type="button" class="edit" onclick="editEqp()">Edit</button>
+						<form id="eqpInfo">
+							<label for="Name">Name:</label>
+							<input type="text" name="Name">
+							<label for="Location">Location:</label>
+							<input type="text" name="Location">
+							<label for="Quantity">Quantity:</label>
+							<input type="text" name="Quantity">
+							<label for="Tags">Tags:</label>
+							<input type="text" name="Tags">
+							<label for="Description">Description:</label>
+							<textarea type="text" name="Description"></textarea>
+							<button class="submit" type="submit" onclick="addMode = !addMode">Confirm</button>
+						</form> <!-- eqpInfo -->
+						<form id="editInfo">
+							<h1 class="objTitle">No object selected!</h1>
+							<label for="Location">Location:</label>
+							<input type="text" name="Location">
+							<label for="Quantity">Quantity:</label>
+							<input type="text" name="Quantity">
+							<label for="Description">Description:</label>
+							<textarea type="text" name="Description"></textarea>
+							<button class="submit" type="submit" onclick="editMode = !editMode">Confirm</button>
+						</form> <!-- editInfo -->
+
+					</div> <!-- eqpList -->
+					<div id="envPlot" class="column">
+						<h1>Environmental Plots</h1>
+						<div id="chart" class="plots"></div>
+						<button type="button" class="history" onclick="stopPlot()">History</button>
+						<form id="plotFunc">
+							<label for="Start">Start:</label>
+							<input type="text" name="Start">
+							<label for="End">End:</label>
+							<input type="text" name="End">
+							<button class="submit" type="submit" onclick="return false">Confirm</button>
+							<button class="download" type="submit" onclick="return false">Download</button>
+						</form> <!-- plotFunc -->
+					</div> <!-- envPlot -->
+				</div> <!-- row -->
+			</div> <!-- footerHelp -->
+			<footer>
+			</footer>
+		</div>
+		<div></div>
+		<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+		<script type="text/javascript" src="/static/js/main.js"></script>
+	</body>
+</html>
+
+
+
+
+
+
+
+
+
