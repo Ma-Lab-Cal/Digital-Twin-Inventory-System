@@ -4,6 +4,7 @@ let currObj = "";
 let currCat = "";
 function flip(b) {return b = !b;}
 let objInfo = "Equipment Info";
+const d = new Date();
 document.getElementById("eqpInfo").style.display = "none";
 document.getElementById("editInfo").style.display = "none";
 document.getElementById("plotFunc").style.display = "none";
@@ -11,28 +12,8 @@ document.getElementById("plotFunc").style.display = "none";
 
 
 
-// Time
-const d = new Date();
-function timeConverter(timestamp) {
-  var t = new Date(timestamp * 1000);
-  var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  var year = t.getFullYear();
-  var month = months[t.getMonth()];
-  var date = t.getDate();
-  var hour = t.getHours();
-  var min = t.getMinutes();
-  var sec = t.getSeconds();
-  var time = date + ' ' + month + ' ' + hour + ':' + min + ':' + sec;
-  // var time = date + ' ' + month + '' + year + ' ' + hour + ':' + min + ':' + sec;
-  return time;
-}
-// Time
-
-
-
 // Reading JSON
 async function fetchData() {
-    // let file = 'json/sample.json';
     let file = 'http://localhost:8001/inventory-data';
     let r = await fetch(file);
     return await r.json();
@@ -244,24 +225,12 @@ var onSearchHandler = function(e) {
     if (!tokens[i]) continue;
 
     for (let n = 0; n < entries.length; n += 1) {
-        // console.log(objMap.get(raw_entries[n]).Tag.toLowerCase());
       let pos = entries[n].indexOf(tokens[i]);
       if (pos != -1) {
         let display_text = raw_entries[n].substring(0, pos) + "<span class=\"highlight\">" + raw_entries[n].substring(pos, pos + tokens[i].length) + "</span>" + raw_entries[n].substring(pos + tokens[i].length);
         autofill_list.push(raw_entries[n])
         autofill_results.push(display_text);
       }
-    }
-
-    for (let n = 0; n < entries.length; n += 1) {
-        if (!autofill_list.includes(raw_entries[n])) {
-            let eTags = objMap.get(raw_entries[n]).Tag.toLowerCase();
-            if (eTags.includes(tokens[i] + ";")) {
-                let display_text = raw_entries[n] + " " + "<span class=\"highlight\">(" + tokens[i] + ")</span>";
-                autofill_list.push(raw_entries[n])
-                autofill_results.push(display_text);
-            }
-        }
     }
   }
 
@@ -293,32 +262,45 @@ window.onload = function() {
 // Search Engine
 
 
+// Data fetch
 
-// Data Fetch
 var env_data = {};
+
 var ws = new WebSocket("ws://127.0.0.1:8000/ws");
 
 var requestData = function() {
-    ws.send("hello");
+  ws.send("hello");
 }
 
 ws.onopen = function () {
-    console.log("Connection success");
-}
+  console.log("Connection success");
+};
 
-ws.onmessage = function(e) {
-    var data = e.data;
-    data = JSON.parse(data);
-    console.log(data);
-    env_data = data;
-}
+ws.onmessage = function (e) {
+  var data = e.data;
+  data = JSON.parse(data);
+  // console.log("recv");
+  console.log(data);
+  env_data = data;
 
-ws.onclose = function() {
-    console.log("Connection is closed...");
-}
+//   env_data[0].x.push(data["/node0/timestamp"]);
+//   env_data[0].y.push(data["/node0/temperature"]);
+//   env_data[1].x.push(data["/node0/timestamp"]);
+//   env_data[1].y.push(data["/node1/temperature"]);
+
+//   env_data[0].x = env_data[0].x.slice(-600);
+//   env_data[0].y = env_data[0].y.slice(-600);
+//   env_data[1].x = env_data[1].x.slice(-600);
+//   env_data[1].y = env_data[1].y.slice(-600);
+
+//   Plotly.redraw('plot');
+};
+
+ws.onclose = function () {
+  console.log("Connection is closed...");
+};
 
 setInterval(requestData, 5000);
-// Data Fetch
 
 
 
@@ -332,14 +314,14 @@ var layout = {
     annotations: [
     {text: "Temperature", font: {size: 20, color: 'black'}, showarrow: false, align: 'center', x: 0, y: 1.1, xref: 'x1 domain', yref: 'y1 domain'},
     {text: "Humidity", font: {size: 20, color: 'black'}, showarrow: false, align: 'center', x: 0, y: 1.1, xref: 'x2 domain', yref: 'y2 domain'},
-    {text: "Brightness", font: {size: 20, color: 'black'}, showarrow: false, align: 'center', x: 0, y: 1.1, xref: 'x3 domain', yref: 'y3 domain'}
+    {text: "Noise", font: {size: 20, color: 'black'}, showarrow: false, align: 'center', x: 0, y: 1.1, xref: 'x3 domain', yref: 'y3 domain'}
     ],
     xaxis1: {showgrid: false, showticklabels: false, matches: 'x3', zeroline: false},
     xaxis2: {showgrid: false, showticklabels: false, matches: 'x3', zeroline: false},
     xaxis3: {showgrid: false, zeroline: false, title: {text: 'Time', font: {family: 'Arial, Helvrtica, sans-serif', size: 10, color: '#000000'}}},
     yaxis1: {showgrid: false, title: {text: '°C', font: {family: 'Arial, Helvrtica, sans-serif', size: 10, color: '#000000'}}},
     yaxis2: {showgrid: false, zeroline: false, title: {text: '%', font: {family: 'Arial, Helvrtica, sans-serif', size: 10, color: '#000000'}}},
-    yaxis3: {showgrid: false, zeroline: false, title: {text: 'lux', font: {family: 'Arial, Helvrtica, sans-serif', size: 10, color: '#000000'}}}
+    yaxis3: {showgrid: false, zeroline: false, title: {text: 'dB', font: {family: 'Arial, Helvrtica, sans-serif', size: 10, color: '#000000'}}}
     };
 
 var data = [
@@ -357,46 +339,15 @@ var data = [
 let numPlots = 3;
 let numRooms = 3;
 
-// function getData() {return Math.random();}
-function getData(p, r) {
-    if (r = 0) {
-        switch (p) {
-            case 0:
-            return env_data["/node0/temperature"];
-            case 1:
-            return env_data["/node0/humidity"];
-            case 2:
-            return env_data["/node0/lux"];
-        }
-    } else if (r = 1) {
-        switch (p) {
-            case 0:
-            return env_data["/node0/temperature"];
-            case 1:
-            return env_data["/node0/humidity"];
-            case 2:
-            return env_data["/node0/lux"];
-        }
-    } else if (r = 2) {
-        switch (p) {
-            case 0:
-            return env_data["/node0/temperature"];
-            case 1:
-            return env_data["/node0/humidity"];
-            case 2:
-            return env_data["/node0/lux"];
-        }
-    }
+function getData() {
+    return env_data["/node0/temperature"];
 }
 
-// let grow = 0;
-// function growth() {
-//     grow += 1;
-//     return grow;
-// }
-
-function growth() {return timeConverter(env_data["/node0/timestamp"]);}
-// function growth() {return env_data["/node0/timestamp"];}
+let grow = 1;
+function growth() {
+    grow += 1;
+    return grow;
+}
 
 Plotly.plot('chart', data, layout);
 
@@ -404,8 +355,7 @@ setInterval(function() {
     for (var i = 0; i < numPlots; i += 1) {
         for (var j = 0; j < numRooms; j += 1){
             data[i * numPlots + j].x.push(growth());
-            // data[i * numPlots + j].y.push(getData());
-            data[i * numPlots + j].y.push(getData(i, j));
+            data[i * numPlots + j].y.push(getData());
             data[i * numPlots + j].x = data[i * numPlots + j].x.slice(-10);
             data[i * numPlots + j].y = data[i * numPlots + j].y.slice(-10);
         }

@@ -25,7 +25,7 @@ def resetConnection():
 s = resetConnection()
 
 while True:
-    s.send(json.dumps({"func": "getAll", "params": {}}).encode())
+    s.send(json.dumps({"func": "getAll", "params": {}}).encode() + b"\n")
     try:
         buffer = s.recv(1024)
     except (ConnectionResetError, ConnectionAbortedError):
@@ -81,6 +81,7 @@ while True:
     if not buffer:
         continue
     
+    print(buffer)
     data = json.loads(buffer.decode())
     folder_path = "H:\\Shared drives\\Ma Lab SPA\\Test-EnvData\\"
     with open(os.path.join(folder_path, "{0}_node0.csv".format(datetime.datetime.now().strftime("%Y-%m-%d"))), "a", encoding="utf-8") as f:

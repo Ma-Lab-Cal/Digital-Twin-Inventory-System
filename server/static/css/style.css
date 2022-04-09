@@ -1,3 +1,13 @@
+/*Canvas*/
+canvas{
+  position: absolute;
+  top: 30;
+  left: 3vw;
+}
+/*Canvas*/
+
+
+
 /*Global*/
 body{
   background-color: white;
