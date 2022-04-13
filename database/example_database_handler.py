@@ -115,7 +115,7 @@ class EnvDatabase:
     def close(self):
         self._conn.close()
 
-db = EnvDatabase("env_data.db")
+db = EnvDatabase("env_data.db", "G:\\Shared drives\\Ma Lab SPA\\Test-EnvData")
 
 db.addData({
     "timestamp": time.time(),
@@ -124,3 +124,5 @@ db.addData({
 })
 
 print(db.getData())
+
+db.close()
