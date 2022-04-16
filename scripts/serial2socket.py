@@ -29,7 +29,8 @@ while True:
         continue
     print(data)
         
-    data["/node0/timestamp"] = time.time()
+    data["/timestamp"] = time.time()
+    data["/node_name"] = "node_0"
     
     print("sending data")
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -42,7 +43,7 @@ while True:
             continue
         break
 
-    s.sendall(json.dumps({"func": "set", "params": data}).encode() + b"\n")
+    s.sendall(json.dumps({"method": "SET", "params": data}).encode() + b"\n")
     
     print("reading response")
     try:

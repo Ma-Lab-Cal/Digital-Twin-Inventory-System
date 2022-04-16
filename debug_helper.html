@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="refresh" content="5">
+</head>
+<body>
+  <h1>Inventory</h1>
+  <div id="inv_list"></div>
+  <h1>Environmental</h1>
+  <div id="env_list"></div>
+	<script>
+		var inventory_list = [];
+
+		window.onload = function() {
+      env_fetch();
+			inventory_fetchAll();
+		}
+
+		var env_fetch = function() {
+			var socket = new WebSocket("ws://localhost:8000");
+			socket.addEventListener("open", function(e) {
+				var request = {
+					"method": "GET",
+					"params": {
+						"type": "range",
+            "range": [new Date().getTime() * 0.001 - 120, new Date().getTime() * 0.001]
+					}
+				}
+				socket.send(JSON.stringify(request)+"\n");
+			});
+
+			socket.addEventListener("message", function(e) {
+        let data = JSON.parse(e.data);
+        data = data.data;
+				console.log(data);
+        env_list.innerHTML = JSON.stringify(data);
+			});
+		};
+
+		var inventory_fetchAll = function() {
+			var socket = new WebSocket("ws://localhost:8080");
+			socket.addEventListener("open", function(e) {
+				var request = {
+					"method": "GET",
+					"params": {
+						"key": "/inventory_item/%"
+					}
+				}
+				socket.send(JSON.stringify(request)+"\n");
+			});
+
+			socket.addEventListener("message", function(e) {
+				let data = JSON.parse(e.data);
+				inventory_list = [];
+				for (let i=0; i<data.length; i+=1) {
+					inventory_list.push(JSON.parse(data[i][1]));
+				}
+				console.log(inventory_list);
+        inv_list.innerHTML = JSON.stringify(inventory_list);
+			});
+		};
+		
+		// This can also be used to update information on a certain item
+    // server will auto choose to add or update based on the "key" provided
+		var inventory_addItem = function() {
+			var socket = new WebSocket("ws://localhost:8080");
+			socket.addEventListener("open", function(e) {
+				var request = {
+					"method": "SET",
+					"params": {
+						"key": "/inventory_item/202204050005",
+						"value": {
+								"sku": "202204050005",
+								"uri": "",
+								"name": "RIDGID 1/2'' Close Quarters Tubing Cutter Model 103",
+								"qty": "1",
+								"description": "",
+								"tag": "tools",
+								"img": ""
+						}
+					}
+				}
+				socket.send(JSON.stringify(request)+"\n");
+			});
+
+			socket.addEventListener("message", function(e) {
+				console.log(e.data);
+			});
+		};
+
+
+
+	</script>
+</body>
+</html>

@@ -4,8 +4,8 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>Digital Twin of Ma Lab</title>
-		<!-- <link rel="stylesheet" type="text/css" href="css/style.css"> -->
 		<link rel="stylesheet" type="text/css" href="/static/css/style.css">
+		<!-- <link rel="stylesheet" type="text/css" href="/static/css/style.css"> -->
 	</head>
 	<body>
 		<div id="footerControl">
@@ -44,11 +44,11 @@
 						<form id="editInfo">
 							<h1 class="objTitle">No object selected!</h1>
 							<label for="Location">Location:</label>
-							<input type="text" name="Location">
+							<input type="text" name="Location" id="locInfo">
 							<label for="Quantity">Quantity:</label>
-							<input type="text" name="Quantity">
+							<input type="text" name="Quantity" id="qtyInfo">
 							<label for="Description">Description:</label>
-							<textarea type="text" name="Description"></textarea>
+							<textarea type="text" name="Description" id="desInfo"></textarea>
 							<button class="submit" type="submit" onclick="editMode = !editMode">Confirm</button>
 						</form> <!-- editInfo -->
 
@@ -58,6 +58,7 @@
 						<div id="chart" class="plots"></div>
 						<button type="button" class="history" onclick="stopPlot()">History</button>
 						<form id="plotFunc">
+							<label>Formatted as MM/DD/YYYY hh:mm:ss</label>
 							<label for="Start">Start:</label>
 							<input type="text" name="Start">
 							<label for="End">End:</label>

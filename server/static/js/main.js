@@ -16,15 +16,43 @@ const d = new Date();
 function timeConverter(timestamp) {
   var t = new Date(timestamp * 1000);
   var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  var year = t.getFullYear();
+  // var year = t.getFullYear();
   var month = months[t.getMonth()];
   var date = t.getDate();
   var hour = t.getHours();
   var min = t.getMinutes();
   var sec = t.getSeconds();
-  var time = date + ' ' + month + ' ' + hour + ':' + min + ':' + sec;
-  // var time = date + ' ' + month + '' + year + ' ' + hour + ':' + min + ':' + sec;
+  // var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec;
+  var time = month + ' ' + date + ' ' + hour + ':' + min + ':' + sec;
   return time;
+
+  
+}
+
+// function timeConverter(timestamp) {
+//   var t = new Date(timestamp);
+//   var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+//   var year = t.getFullYear();
+//   var month = t.getMonth();
+//   var date = t.getDate();
+//   var hour = t.getHours();
+//   var min = t.getMinutes();
+//   var sec = t.getSeconds();
+//   // var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec;
+//   var time = year + '-' + month + '-' + date// + '-' + hour + '-' + min + '-' + sec;
+//   return time;
+// }
+
+function timeRecognize(texttime) {
+    const [dateComponents, timeComponents] = texttime.split(' ');
+
+    const [month, day, year] = dateComponents.split('/');
+    const [hours, minutes, seconds] = timeComponents.split(':');
+
+    const date = new Date(+year, month - 1, +day, +hours, +minutes, +seconds);
+
+    const unixTimestamp = Math.floor(date.getTime() / 1000);
+    return unixTimestamp;
 }
 // Time
 
@@ -177,6 +205,9 @@ function editEqp() {
         document.getElementById("editInfo").style.display = "block";
         if (currObj != "") {
             document.querySelector('.objTitle').innerText = currObj;
+            document.getElementById("locInfo").value = objMap.get(currObj).URI;
+            document.getElementById("qtyInfo").value = objMap.get(currObj).Qty;
+            document.getElementById("desInfo").value = objMap.get(currObj).Description;
         } else{
             document.querySelector('.objTitle').innerText = "No object selected!";
         }
@@ -324,11 +355,11 @@ setInterval(requestData, 5000);
 
 // Data Plot
 var layout = {
-    legend: {"orientation": "h"},
+    legend: {"orientation": "h", x: 0, y: 1.05, yanchor: 'top'},
     colorway: ['red', 'green', 'blue', 'red', 'green', 'blue', 'red', 'green', 'blue'],
     grid: {rows: 3, columns: 1, roworder: 'bottom to top'},
-    autosize: false, width: 445, height: 900, paper_bgcolor: 'ffffff', plot_bgcolor: 'ffffff',
-    margin: {l: 35, r: 25, b: 30, t: 20, pad: 0},
+    autosize: false, width: 445, height: 900, paper_bgcolor: 'ffffff', plot_bgcolor: 'f4f4f4',
+    margin: {l: 35, r: 25, b: 100, t: 20, pad: 0},
     annotations: [
     {text: "Temperature", font: {size: 20, color: 'black'}, showarrow: false, align: 'center', x: 0, y: 1.1, xref: 'x1 domain', yref: 'y1 domain'},
     {text: "Humidity", font: {size: 20, color: 'black'}, showarrow: false, align: 'center', x: 0, y: 1.1, xref: 'x2 domain', yref: 'y2 domain'},
@@ -389,14 +420,9 @@ function getData(p, r) {
     }
 }
 
-// let grow = 0;
-// function growth() {
-//     grow += 1;
-//     return grow;
-// }
+// function growth() {return timeConverter(Date.now());}
 
 function growth() {return timeConverter(env_data["/node0/timestamp"]);}
-// function growth() {return env_data["/node0/timestamp"];}
 
 Plotly.plot('chart', data, layout);
 

@@ -1,0 +1,1 @@
+py -m http.server --directory C:\Users\ma-la\Documents\Digital-Twin-Inventory-System\server 80

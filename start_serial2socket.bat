@@ -1,0 +1,1 @@
+py C:\Users\ma-la\Documents\Digital-Twin-Inventory-System\scripts\serial2socket.py
