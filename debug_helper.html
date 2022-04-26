@@ -12,18 +12,21 @@
 		var inventory_list = [];
 
 		window.onload = function() {
-      env_fetch();
+      env_fetch(new Date().getTime(), 120);
 			inventory_fetchAll();
 		}
 
-		var env_fetch = function() {
+		var end = new Date().getTime;
+		var interval = 120;
+
+		env_fetch = function(end, length) {
 			var socket = new WebSocket("ws://localhost:8000");
 			socket.addEventListener("open", function(e) {
 				var request = {
 					"method": "GET",
 					"params": {
 						"type": "range",
-            "range": [new Date().getTime() * 0.001 - 120, new Date().getTime() * 0.001]
+            "range": [new Date(end).getTime() / 1000 - interval, new Date(end).getTime() / 1000]
 					}
 				}
 				socket.send(JSON.stringify(request)+"\n");

@@ -59,11 +59,11 @@
 						<button type="button" class="history" onclick="stopPlot()">History</button>
 						<form id="plotFunc">
 							<label>Formatted as MM/DD/YYYY hh:mm:ss</label>
-							<label for="Start">Start:</label>
-							<input type="text" name="Start">
+							<label for="Start">Interval:</label>
+							<input type="text" name="Interval" id="Interval">
 							<label for="End">End:</label>
-							<input type="text" name="End">
-							<button class="submit" type="submit" onclick="return false">Confirm</button>
+							<input type="text" name="End" id="End">
+							<button class="submit" type="submit" onclick="return getFormData()">Confirm</button>
 							<button class="download" type="submit" onclick="return false">Download</button>
 						</form> <!-- plotFunc -->
 					</div> <!-- envPlot -->
