@@ -1,0 +1,48 @@
+<html>
+<head>
+  <style>
+  .card {
+    width: 2in;
+    height: 1in;
+    border: 1px dotted #666;
+    display: flex;
+  }
+  .card .text {
+    margin-left: 1rem;
+  }
+  @media print {
+    @page {
+      size: 2in 1in;
+      margin: 0;
+    }
+    .card {
+      border: 0;
+    }
+  }
+  </style>
+  <script src="datamatrix.min.js"></script>
+</head>
+<body>
+  <div class="card">
+    <div class="barcode" id="barcode"></div>
+    <div class="text">hello</div>
+  </div>
+
+  <script>
+  var datamatrix_code = DATAMatrix({
+    msg: "Your message here",
+    dim: 64,
+    rct: 0,
+    pad: 1,
+    pal: ["#000000", "#FFFFFF"],
+    vrb: 0,
+  });
+  barcode.appendChild(datamatrix_code);
+  
+  
+  window.onload = function () {
+    window.print();  
+  }
+  </script>
+</body>
+</html>

@@ -7,6 +7,7 @@ import threading
 import json
 import logging
 import time
+import sqlite3
 
 # ==========================
 
@@ -34,7 +35,11 @@ class FlamingoNT:
             "getall": self.default_getAll,
         }
         
-        self.nt = {}
+        self.db = sqlite3.connect("networktable.db")
+        self.DB_KEYS = ("timestamp", "key", "value")
+
+        self.initTable()
+
 
         self._stop = threading.Event()
         
@@ -42,6 +47,13 @@ class FlamingoNT:
         self._s.bind(self.addr)
         self._s.listen(self.n_connections)
         self._s.settimeout(1)
+
+    def initTable(self):
+        self.db.execute("""CREATE TABLE IF NOT EXISTS NetworkTable (
+                timestamp       BIGINT  PRIMARY KEY,
+                key             VARCHAR(65535),
+                value           MEDIUMTEXT
+            );""")
 
     def addSocketHandler(self, uri, handler):
         # convert to absolute path
