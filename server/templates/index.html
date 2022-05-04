@@ -30,41 +30,50 @@
 						<button type="button" class="edit" onclick="editEqp()">Edit</button>
 						<form id="eqpInfo">
 							<label for="Name">Name:</label>
-							<input type="text" name="Name">
+							<input type="text" name="Name" id="addname">
+							<label for="Name">Key:</label>
+							<input type="text" name="Key" id="addsku">
 							<label for="Location">Location:</label>
-							<input type="text" name="Location">
+							<input type="text" name="Location" id="adduri">
 							<label for="Quantity">Quantity:</label>
-							<input type="text" name="Quantity">
+							<input type="text" name="Quantity" id="addqty">
 							<label for="Tags">Tags:</label>
-							<input type="text" name="Tags">
+							<input type="text" name="Tags" id="addtag">
 							<label for="Description">Description:</label>
-							<textarea type="text" name="Description"></textarea>
-							<button class="submit" type="submit" onclick="addMode = !addMode">Confirm</button>
+							<textarea type="text" name="Description" id="adddes"></textarea>
+							<button class="submit" type="button" onclick="addEvent(); return false;">Confirm</button>
 						</form> <!-- eqpInfo -->
 						<form id="editInfo">
 							<h1 class="objTitle">No object selected!</h1>
+							<label for="Name">Key:</label>
+							<p type="text" name="Key" id="skuInfo"></p>
 							<label for="Location">Location:</label>
-							<input type="text" name="Location" id="locInfo">
+							<input type="text" name="Location" id="uriInfo">
 							<label for="Quantity">Quantity:</label>
 							<input type="text" name="Quantity" id="qtyInfo">
+							<label for="Tags">Tags:</label>
+							<input type="text" name="Tags" id="tagInfo">
 							<label for="Description">Description:</label>
 							<textarea type="text" name="Description" id="desInfo"></textarea>
-							<button class="submit" type="submit" onclick="editMode = !editMode">Confirm</button>
+							<button class="submit" type="submit" onclick="editEvent(); return false;">Confirm</button>
 						</form> <!-- editInfo -->
 
 					</div> <!-- eqpList -->
 					<div id="envPlot" class="column">
 						<h1>Environmental Plots</h1>
+						<button class="download" type="button" onclick="interval = 300; historyEvent(); return false">5 min</button>
+						<button class="download" type="button" onclick="interval = 3600; historyEvent(); return false">1 hrs</button>
+						<button class="download" type="button" onclick="interval = 86400; historyEvent(); return false">1 day</button>
 						<div id="chart" class="plots"></div>
 						<button type="button" class="history" onclick="stopPlot()">History</button>
 						<form id="plotFunc">
-							<label>Formatted as MM/DD/YYYY hh:mm:ss</label>
+							<!-- <label>Formatted as MM/DD/YYYY hh:mm:ss</label>
 							<label for="Start">Interval:</label>
-							<input type="text" name="Interval" id="Interval">
+							<input type="text" name="Interval" id="Interval"> -->
 							<label for="End">End:</label>
 							<input type="text" name="End" id="End">
-							<button class="submit" type="submit" onclick="return getFormData()">Confirm</button>
-							<button class="download" type="submit" onclick="return false">Download</button>
+							<button class="submit" type="submit" onclick="historyEvent(); return false;">Confirm</button>
+							<button class="download" type="submit" onclick="interval = 300; historyEvent(); return false">Download</button>
 						</form> <!-- plotFunc -->
 					</div> <!-- envPlot -->
 				</div> <!-- row -->

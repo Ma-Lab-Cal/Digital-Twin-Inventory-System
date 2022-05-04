@@ -1,33 +1,3 @@
-// 	// This can also be used to update information on a certain item
-//     // server will auto choose to add or update based on the "key" provided
-// 		var inventory_addItem = function() {
-// 			var socket = new WebSocket("ws://localhost:8080");
-// 			socket.addEventListener("open", function(e) {
-// 				var request = {
-// 					"method": "SET",
-// 					"params": {
-// 						"key": "/inventory_item/202204050005",
-//                         // The key (same as sku) to identify equipments, uses yyyymmddCODE, where CODE accumulates from 0000
-// 						"value": {
-// 								"sku": "202204050005",
-// 								"uri": "",
-// 								"name": "RIDGID 1/2'' Close Quarters Tubing Cutter Model 103",
-// 								"qty": "1",
-// 								"description": "",
-// 								"tag": "tools",
-// 								"img": ""
-// 						}
-//                         // Get input data from add and put into this "value" field
-// 					}
-// 				}
-// 				socket.send(JSON.stringify(request)+"\n");
-// 			});
-
-// 			socket.addEventListener("message", function(e) {
-// 				console.log(e.data);
-// 			});
-// 		};
-
 // Global
 let currObj = "";
 let currCat = "";
@@ -35,6 +5,8 @@ function flip(b) {return b = !b;}
 let objInfo = "Equipment Info";
 document.getElementById("eqpInfo").style.display = "none";
 document.getElementById("editInfo").style.display = "none";
+// document.getElementById("Interval").value = 3600;
+document.getElementById("End").value = timeReader(new Date().getTime() / 1000);
 document.getElementById("plotFunc").style.display = "none";
 // Global
 
@@ -188,6 +160,12 @@ function objSelect(name) {
     objInfo = location;
     currObj = name;
     addPoint(pointMap.get(location).x, pointMap.get(location).y); // update with canvas
+    document.querySelector('.objTitle').innerText = currObj;
+    document.getElementById("skuInfo").innerHTML = objMap.get(currObj).sku;
+    document.getElementById("uriInfo").value = objMap.get(currObj).uri;
+    document.getElementById("qtyInfo").value = objMap.get(currObj).qty;
+    document.getElementById("tagInfo").value = objMap.get(currObj).tag;
+    document.getElementById("desInfo").value = objMap.get(currObj).description;
 }
 // Dropdown List
 
@@ -210,7 +188,8 @@ const pointMap = new Map([
   ["Test2", {x:250, y:500}],
   ["Test5", {x:500, y:500}],
   ["Test8", {x:500, y:250}],
-  [" ", {x:2500, y:2500}]
+  [" ", {x:1000, y:1000}],
+  ["Daniel", {x:1500, y:1500}]
 ]); // manually set the point locations, become ratios once canvas is used
 
 // const pointMap = new Map([
@@ -303,11 +282,18 @@ function editEqp() {
         document.getElementById("editInfo").style.display = "block";
         if (currObj != "") {
             document.querySelector('.objTitle').innerText = currObj;
-            document.getElementById("locInfo").value = objMap.get(currObj).uri;
+            document.getElementById("skuInfo").innerHTML = objMap.get(currObj).sku;
+            document.getElementById("uriInfo").value = objMap.get(currObj).uri;
             document.getElementById("qtyInfo").value = objMap.get(currObj).qty;
+            document.getElementById("tagInfo").value = objMap.get(currObj).tag;
             document.getElementById("desInfo").value = objMap.get(currObj).description;
         } else{
             document.querySelector('.objTitle').innerText = "No object selected!";
+            document.getElementById("skuInfo").innerHTML = "";
+            document.getElementById("uriInfo").value = "";
+            document.getElementById("qtyInfo").value = "";
+            document.getElementById("tagInfo").value = "";
+            document.getElementById("desInfo").value = "";
         }
     }
 }
@@ -325,6 +311,131 @@ edit.addEventListener('click', function onClick() {
 
 
 
+// Add and Edit
+var addname;
+var addsku;
+var adduri;
+var addqty;
+var addtag;
+var adddes;
+
+function getAddData() {
+    var name = document.getElementById('addname').value;
+    var sku = document.getElementById('addsku').value;
+    var uri = document.getElementById('adduri').value;
+    var qty = document.getElementById('addqty').value;
+    var tag = document.getElementById('addtag').value;
+    var des = document.getElementById('adddes').value;
+    addname = name;
+    addsku = sku;
+    adduri = uri;
+    addqty = qty;
+    addtag = tag;
+    adddes = des;
+}
+
+function getEditData() {
+    var uri = document.getElementById('uriInfo').value;
+    var qty = document.getElementById('qtyInfo').value;
+    var tag = document.getElementById('tagInfo').value;
+    var des = document.getElementById('desInfo').value;
+    addname = currObj;
+    addsku = objMap.get(currObj).sku;
+    adduri = uri;
+    addqty = qty;
+    addtag = tag;
+    adddes = des;
+}
+
+function inventory_addItem() {
+    var socket = new WebSocket("ws://localhost:8080");
+    socket.addEventListener("open", function(e) {
+        var request = {
+            "method": "SET",
+            "params": {
+                "key": "/inventory_item/" + addsku,
+                "value": {
+                        "sku": addsku,
+                        "uri": adduri,
+                        "name": addname,
+                        "qty": addqty,
+                        "description": adddes,
+                        "tag": addtag,
+                        "img": ""
+                }
+            }
+        }
+        socket.send(JSON.stringify(request)+"\n");
+    });
+
+    socket.addEventListener("message", function(e) {
+        console.log(e.data);
+    });
+};
+
+function addEvent() {
+    if (addMode) {
+        getAddData();
+        inventory_addItem();
+    }
+    raw_entries = [];
+    objMap = new Map([]);
+    inventory_list = [];
+    inventory_fetchAll();
+    setTimeout(useData, 2500);
+    autofill.innerHTML = "";
+    setTimeout(window.onload = function() {
+        searchbar.addEventListener("keyup", onSearchHandler);
+      
+        for (let n = 0; n < raw_entries.length; n += 1) {
+          entries[n] = raw_entries[n];
+          for (let i = 0; i < word_mapping.length; i += 1) {
+            entries[n] = entries[n].replace(word_mapping[i][0], word_mapping[i][1]);
+          }
+          entries[n] = entries[n].toLowerCase()
+        }
+        
+        onSearchHandler();
+      }, 2500);
+      document.getElementById("addname").value = "";
+      document.getElementById("addsku").value = "";
+      document.getElementById("adduri").value = "";
+      document.getElementById("addqty").value = "";
+      document.getElementById("addtag").value = "";
+      document.getElementById("adddes").value = "";
+    return false;
+}
+
+function editEvent() {
+    if (editMode) {
+        getEditData();
+        inventory_addItem();
+    }
+    raw_entries = [];
+    objMap = new Map([]);
+    inventory_list = [];
+    inventory_fetchAll();
+    setTimeout(useData, 2500);
+    autofill.innerHTML = "";
+    setTimeout(window.onload = function() {
+        searchbar.addEventListener("keyup", onSearchHandler);
+      
+        for (let n = 0; n < raw_entries.length; n += 1) {
+          entries[n] = raw_entries[n];
+          for (let i = 0; i < word_mapping.length; i += 1) {
+            entries[n] = entries[n].replace(word_mapping[i][0], word_mapping[i][1]);
+          }
+          entries[n] = entries[n].toLowerCase()
+        }
+        
+        onSearchHandler();
+      }, 2500);
+    return false;
+}
+// Add and Edit
+
+
+
 // History & Download
 const history = document.querySelector('.history');
 let historyMode = false;
@@ -339,13 +450,14 @@ history.addEventListener('click', function onClick() {
 })
 function stopPlot() {
     historyMode = !historyMode;
+    historyEvent();
     if (!historyMode) {
-        document.getElementById("Interval").value = 120;
+        // document.getElementById("Interval").value = 3600;
         document.getElementById("End").value = timeReader(new Date().getTime() / 1000);
         document.getElementById("plotFunc").style.display = "none";
     } else {
         document.getElementById("plotFunc").style.display = "block";
-        document.getElementById("Interval").value = 120;
+        // document.getElementById("Interval").value = 3600;
         document.getElementById("End").value = timeReader(new Date().getTime() / 1000);
     }
 }
@@ -429,7 +541,7 @@ setTimeout(window.onload = function() {
 
 // Data Fetch
 var env_data = [];
-var interval = 120;
+var interval = 3600;
 var end = new Date().getTime() / 1000;
 var env_fetch = function() {
     var socket = new WebSocket("ws://localhost:8000");
@@ -454,31 +566,12 @@ var env_fetch = function() {
 
 
 // Data Plot
-// var layout = {
-//     legend: {"orientation": "h", x: 0, y: 1.05, yanchor: 'top'},
-//     colorway: ['red', 'green', 'blue', 'red', 'green', 'blue', 'red', 'green', 'blue'],
-//     grid: {rows: 3, columns: 1, roworder: 'bottom to top'},
-//     autosize: false, width: 445, height: 900, paper_bgcolor: 'ffffff', plot_bgcolor: 'f4f4f4',
-//     margin: {l: 35, r: 25, b: 150, t: 20, pad: 0},
-//     annotations: [
-//     {text: "Temperature", font: {size: 20, color: 'black'}, showarrow: false, align: 'center', x: 0, y: 1.1, xref: 'x1 domain', yref: 'y1 domain'},
-//     {text: "Humidity", font: {size: 20, color: 'black'}, showarrow: false, align: 'center', x: 0, y: 1.1, xref: 'x2 domain', yref: 'y2 domain'},
-//     {text: "Brightness", font: {size: 20, color: 'black'}, showarrow: false, align: 'center', x: 0, y: 1.1, xref: 'x3 domain', yref: 'y3 domain'}
-//     ],
-//     xaxis1: {showgrid: false, showticklabels: false, matches: 'x3', zeroline: false},
-//     xaxis2: {showgrid: false, showticklabels: false, matches: 'x3', zeroline: false},
-//     xaxis3: {showgrid: false, zeroline: false, title: {text: 'Time', font: {family: 'Arial, Helvrtica, sans-serif', size: 10, color: '#000000'}}},
-//     yaxis1: {showgrid: false, title: {text: '°C', font: {family: 'Arial, Helvrtica, sans-serif', size: 10, color: '#000000'}}},
-//     yaxis2: {showgrid: false, zeroline: false, title: {text: '%', font: {family: 'Arial, Helvrtica, sans-serif', size: 10, color: '#000000'}}},
-//     yaxis3: {showgrid: false, zeroline: false, title: {text: 'lux', font: {family: 'Arial, Helvrtica, sans-serif', size: 10, color: '#000000'}}}
-//     };
-
 var layout = {
-    legend: {"orientation": "v", x: 1.35, y: 1.05, yanchor: 'top', xanchor: 'right'},
-    colorway: ['red', 'green', 'blue', 'red', 'green', 'blue', 'red', 'green', 'blue'],
+    legend: {"orientation": "v", x: 1, y: 1, yanchor: 'top', xanchor: 'right', font: {family: 'Arial, Helvrtica, sans-serif', size: 10, color: '#000000'}},
+    colorway: ['red', 'green', 'seagreen', 'red', 'green', 'darkorange', 'red', 'green', 'royalblue'],
     grid: {rows: 3, columns: 1, roworder: 'bottom to top', pattern: 'independent'},
     autosize: false, width: 445, height: 900,
-    margin: {l: 35, r: 25, b: 150, t: 20, pad: 0},
+    margin: {l: 35, r: 25, b: 150, t: 30, pad: 0},
     annotations: [
     {text: "Temperature", font: {size: 20, color: 'black'}, showarrow: false, align: 'center', x: 0, y: 1.2, xref: 'x1 domain', yref: 'y1 domain'},
     {text: "Humidity", font: {size: 20, color: 'black'}, showarrow: false, align: 'center', x: 0, y: 1.2, xref: 'x2 domain', yref: 'y2 domain'},
@@ -545,34 +638,43 @@ function growth(i) {return timeConverter(env_data[i]["timestamp"]);}
 
 Plotly.plot('chart', data, layout);
 
-function getFormData() {
+function getHistoryData() {
     if (!historyMode) {
-        interval = 120;
+        // interval = 3600;
         end = new Date().getTime() / 1000;
     } else {
-        var int = document.getElementById('Interval').value;
+        // var int = document.getElementById('Interval').value;
         var en = document.getElementById('End').value;
-        interval = int;
+        // interval = int;
         end = timeRecognizer(en);
     }
     return false;
-    }
+}
 
-setInterval(function() {
-    getFormData();
+var sub = 1;
+
+function historyEvent() {
+    getHistoryData();
     env_fetch();
-    for (var l = 0; l < env_data.length; l += 1) {
+    sub = Math.floor(interval / 300);
+    for (var l = 0; l < env_data.length; l += sub) {
         for (var i = 0; i < numPlots; i += 1) {
             for (var j = 0; j < numRooms; j += 1){
                 data[i * numPlots + j].x.push(growth(l));
                 // data[i * numPlots + j].y.push(getData());
                 data[i * numPlots + j].y.push(getData(l, i, j));
-                data[i * numPlots + j].x = data[i * numPlots + j].x.slice(-interval / 6);
-                data[i * numPlots + j].y = data[i * numPlots + j].y.slice(-interval / 6);
+                data[i * numPlots + j].x = data[i * numPlots + j].x.slice(-interval / (6 * sub));
+                data[i * numPlots + j].y = data[i * numPlots + j].y.slice(-interval / (6 * sub));
             }
         }
     }
     Plotly.redraw('chart');
+}
+
+setInterval(function() {
+    if (!historyMode) {
+        historyEvent();
+    }
 }, 5000);
 // Data Plot
 

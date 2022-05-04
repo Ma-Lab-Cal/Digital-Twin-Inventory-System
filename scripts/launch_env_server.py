@@ -116,7 +116,7 @@ class FlamingoNT:
                     noise=noise,
                 )
 
-        print(exe_str)
+        # print(exe_str)
         cur = self.db.cursor()
         cur.execute(exe_str)
 
@@ -171,10 +171,10 @@ class FlamingoNT:
                 buffer = stream.receive()
 
                 data = json.loads(buffer.decode())
-                print(data)
+                # print(data)
 
                 ret_data = self.getData(data["params"].get("range")[0], data["params"].get("range")[1])
-                print(ret_data)
+                # print(ret_data)
                 buffer = json.dumps({"method": "RET", "data": ret_data}).encode()
                 stream.transmit(buffer)
 
@@ -207,7 +207,7 @@ class FlamingoNT:
                 
                 conn.send(json.dumps({"method": "RET", "params": {"message": "ADD OK!"}}).encode())
                 
-                buffer = Stream.receivePacket(conn)
+                buffer = Stream.receivePacket(conn, timeout=10)
                 
 
         conn.close()
@@ -272,13 +272,13 @@ class Stream:
         return True
         
     @staticmethod
-    def receivePacket(conn):
+    def receivePacket(conn, timeout=60):
         c = b""
         buffer = b""
 
         while c != b"\x0A":
             buffer += c
-            c = Stream.receive(conn, 1)
+            c = Stream.receive(conn, 1, timeout)
             
             # if remote closes connection, we will not get timeout, but empty data
             if c == b"":
@@ -351,21 +351,21 @@ class WebSocketStream:
         self.conn.settimeout(1)
         self.timeout = timeout
 
-    def receive(self):
-        frame_header, = struct.unpack(">B", Stream.receive(self.conn, 1))
+    def receive(self, timeout=10):
+        frame_header, = struct.unpack(">B", Stream.receive(self.conn, 1, timeout=timeout))
         fin = (frame_header >> 7) & 0b1
         opcode = (frame_header >> 0) & 0b1111
         
-        frame_header, = struct.unpack(">B", Stream.receive(self.conn, 1))
+        frame_header, = struct.unpack(">B", Stream.receive(self.conn, 1, timeout=timeout))
         mask = (frame_header >> 7) & 0b1
 
         # Decoding Payload Length
         payload_len = (frame_header >> 0) & 0b1111111
 
         if payload_len == 126:
-            payload_len, = struct.unpack(">H", Stream.receive(self.conn, 2))
+            payload_len, = struct.unpack(">H", Stream.receive(self.conn, 2, timeout=timeout))
         elif payload_len == 127:
-            payload_len, = struct.unpack(">Q", Stream.receive(self.conn, 8))
+            payload_len, = struct.unpack(">Q", Stream.receive(self.conn, 8, timeout=timeout))
 
         #print(fin, opcode, mask, payload_len)
         # Reading and Unmasking the Data
@@ -376,15 +376,15 @@ class WebSocketStream:
             conn.close()
             return
 
-        masking_key = Stream.receive(self.conn, 4)
+        masking_key = Stream.receive(self.conn, 4, timeout=timeout)
 
-        raw_content = Stream.receive(self.conn, payload_len)
+        raw_content = Stream.receive(self.conn, payload_len, timeout=timeout)
 
         content = b""
         for i in range(payload_len):
             content += struct.pack(">B", raw_content[i] ^ masking_key[i % 4])
 
-        print("content:", content)
+        # print("content:", content)
         return content
 
     def transmit(self, buffer):
