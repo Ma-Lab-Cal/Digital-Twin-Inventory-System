@@ -1,51 +1,107 @@
 <!DOCTYPE html>
+
 <html>
+
 	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Digital Twin of Ma Lab</title>
-		<link rel="stylesheet" type="text/css" href="/static/css/style.css">
-		<!-- <link rel="stylesheet" type="text/css" href="/static/css/style.css"> -->
+		<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
+		<title>Digital Twin of Ma Labbb</title> <!-- for changing the text displayed on the browser tab -->
+		<link rel="stylesheet" type="text/css" href="/static/css/style.css"> <!-- need to change the href if the location of the CSS file is changed -->
 	</head>
+
 	<body>
-		<div id="footerControl">
-			<div id="footerHelp">
-				<header>
+		<div id="footerControl"> <!-- for keeping the footer fixed to the bottem of the page -->
+			<div id="footerHelp"> <!-- for keeping all other stuff relative to scrolling -->
+
+				<header> <!-- add header if needed, can be used as a navigation bar -->
 				</header>
-				<div class="row">
+
+				<div class="row"> <!-- a simple column system, this is the container for all columns -->
+
+
+
 					<div id="flrPlan" class="column">
+
 						<h1 class="location">Main Floor Plan</h1>
-						<button type="button" class="return" onclick="return changeImage('/static/img/Plan 00.png')">Return</button>
-						<img src="/static/img/Plan 00.png" class="image">
-						<canvas id="myCanvas" width="575" height="555" style="border:1px solid #FF0000;"></canvas>
+
+						<button type="button" class="back" onclick="return changeImage('/static/img/Plan 01.png')">Back</button>
+
+						<img src="/static/img/Plan 00.png" class="map"> <!-- change the default floor plan image here -->
+						<!-- <canvas id="myCanvas" width="1170" height="1140" style="border:1px solid #FF0000;"></canvas> -->
+
 					</div> <!-- flrPlan -->
+
+
+
 					<div id="eqpList" class="column">
+
 						<h1>Equipment List</h1>
+
 						<form action="process.php" method="POST">
 							<input type="search" name="search" placeholder="Search..." id="searchbar">
 							<button type="submit" class="search" onclick="return false">🔍</button>
-							<div id="autofill" class="dropDownList" onmouseover="this.style.overflow='auto'" onmouseout="this.style.overflow='hidden'"></div>
-						</form>
+							<div id="autofill" class="dropDownList" onmouseover="this.style.overflow='auto'" onmouseout="this.style.overflow='hidden'"></div> <!-- the logic to hide scrolling bar if not hovered -->
+						</form> <!-- searchbar -->
+
 						<button type="button" class="add" onclick="addEqp()">Add</button>
 						<button type="button" class="edit" onclick="editEqp()">Edit</button>
+						
 						<form id="eqpInfo">
-							<label for="Name">Name:</label>
-							<input type="text" name="Name" id="addname">
-							<label for="Name">Key:</label>
-							<input type="text" name="Key" id="addsku">
-							<label for="Location">Location:</label>
-							<input type="text" name="Location" id="adduri">
-							<label for="Quantity">Quantity:</label>
-							<input type="text" name="Quantity" id="addqty">
-							<label for="Tags">Tags:</label>
-							<input type="text" name="Tags" id="addtag">
-							<label for="Description">Description:</label>
-							<textarea type="text" name="Description" id="adddes"></textarea>
-							<button class="submit" type="button" onclick="addEvent(); return false;">Confirm</button>
+							<h1 class="title">No object selected!</h1>
+							<p>Key:</p>
+							<p type="text" id="sku"></p>
+							<p>Location:</p>
+							<p type="text" id="uri"></p>
+							<p>Quantity:</p>
+							<p type="text" id="qty"></p>
+							<p>Tags:</p>
+							<p type="text" id="tag"></p>
+							<p>Description:</p>
+							<p type="text" id="des"></p>
+							<br>
 						</form> <!-- eqpInfo -->
+
+						<form id="sys">
+							<label for="User">Current User:</label>
+							<select name="Username" id="userEnter">
+								<option value="">Please Select ...</option>
+								<option value="Student 1">Student 1</option>
+								<option value="Student 2">Student 2</option>
+								<option value="Student 3">Student 3</option>
+							</select>
+							<p>Name:</p>
+							<p class="title">No object selected!</p>
+							<p>Locations:</p>
+							<div id="locationlist"></div>
+							<div class="desys">
+								<div class="decol"><button type="button" class="take">Take</button></div>
+								<div class="decol"><input type="text" name="Take" id="takeAM"></div>
+								<div class="decol"><button type="button" class="all">All</button></div>
+								<div class="decol"><button type="button" class="return">Return</button></div>
+								<div class="decol"><input type="text" name="Return" id="returnAM"></div>
+								<div class="decol"><button type="button" class="all">All</button></div>
+							</div>
+							<div class="amsys">
+								<div class="amcol"><button type="button" class="move">Move</button></div>
+								<div class="amcol"><input type="text" name="Move" id="moveAM"></div>
+								<div class="amcol"><button type="button" class="all">All</button></div>
+								<div class="amcol2">from</div>
+								<div class="amcol"><input type="text" name="Move" id="moveFROM"></div>
+								<div class="amcol3">to</div>
+								<div class="amcol"><input type="text" name="Move" id="moveTO"></div>
+							</div>
+							<p>Key:</p>
+							<p type="text" id="sku"></p>
+							<p>Tags:</p>
+							<p type="text" id="tag"></p>
+							<p>Description:</p>
+							<p type="text" id="des"></p>
+							<br>
+						</form> <!-- sys -->
+
 						<form id="editInfo">
-							<h1 class="objTitle">No object selected!</h1>
-							<label for="Name">Key:</label>
+							<label for="Name">Name:</label>
+							<input type="text" name="Name" class="objTitle" id="nameinfo">
+							<label for="ID">Key:</label>
 							<p type="text" name="Key" id="skuInfo"></p>
 							<label for="Location">Location:</label>
 							<input type="text" name="Location" id="uriInfo">
@@ -56,16 +112,51 @@
 							<label for="Description">Description:</label>
 							<textarea type="text" name="Description" id="desInfo"></textarea>
 							<button class="submit" type="submit" onclick="editEvent(); return false;">Confirm</button>
+							<button class="delete" type="button" onclick="return false;">Delete</button>
 						</form> <!-- editInfo -->
 
+						<form id="addInfo">
+							<label for="Name">Name:</label>
+							<input type="text" name="Name" id="addname">
+							<label for="ID">Key:</label>
+							<input type="text" name="Key" id="addsku">
+							<label for="Location">Location:</label>
+							<input type="text" name="Location" id="adduri">
+							<label for="Quantity">Quantity:</label>
+							<input type="text" name="Quantity" id="addqty">
+							<label for="Tags">Tags:</label>
+							<input type="text" name="Tags" id="addtag">
+							<label for="Description">Description:</label>
+							<textarea type="text" name="Description" id="adddes"></textarea>
+							<button class="submit" type="button" onclick="addEvent(); return false;">Confirm</button>
+						</form> <!-- addInfo -->
+
 					</div> <!-- eqpList -->
+
+
+
 					<div id="envPlot" class="column">
+
 						<h1>Environmental Plots</h1>
-						<button class="download" type="button" onclick="interval = 300; historyEvent(); return false">5 min</button>
-						<button class="download" type="button" onclick="interval = 3600; historyEvent(); return false">1 hrs</button>
-						<button class="download" type="button" onclick="interval = 86400; historyEvent(); return false">1 day</button>
+						<button class="intv" type="button" id="env_data_show_5min_btn">5 min</button>
+						<button class="intv" type="button" id="env_data_show_1hr_btn">1 hrs</button>
+						<button class="intv" type="button" id="env_data_show_12hr_btn">12 hrs</button>
+						<!-- <button class="intv" type="button" id="env_data_show_5min_btn" onclick="interval = 300; historyEvent(); return false">5 min</button>
+						<button class="intv" type="button" id="env_data_show_1hr_btn" onclick="interval = 3600; historyEvent(); return false">1 hrs</button>
+						<button class="intv" type="button" id="env_data_show_12hr_btn" onclick="interval = 43200; historyEvent(); return false">12 hrs</button> -->
+
+						<div id="chart_loading_blocker" class="urap-loader" style="width: 150px; height: 150px; position:absolute; right: 300px; top: 300px; z-index:12;"></div>
 						<div id="chart" class="plots"></div>
+
+						<!-- <img src="/static/img/Plan 00.png" class="image" id="graph0">
+						<img src="/static/img/Plan 00.png" class="image" id="graph1">
+						<img src="/static/img/Plan 00.png" class="image" id="graph2">
+						<img src="/static/img/Plan 00.png" class="image" id="graph3">
+						<img src="/static/img/Plan 00.png" class="image" id="graph4">
+						<img src="/static/img/Plan 00.png" class="image" id="graph5"> -->
+
 						<button type="button" class="history" onclick="stopPlot()">History</button>
+
 						<form id="plotFunc">
 							<!-- <label>Formatted as MM/DD/YYYY hh:mm:ss</label>
 							<label for="Start">Interval:</label>
@@ -75,17 +166,25 @@
 							<button class="submit" type="submit" onclick="historyEvent(); return false;">Confirm</button>
 							<button class="download" type="submit" onclick="interval = 300; historyEvent(); return false">Download</button>
 						</form> <!-- plotFunc -->
+
 					</div> <!-- envPlot -->
+
+
+
 				</div> <!-- row -->
+
 			</div> <!-- footerHelp -->
-			<footer>
+
+			<footer> <!-- add footer if needed, can be used as credit and copyright display -->
 			</footer>
+
 		</div> <!-- footerControl -->
-		<div></div>
-		<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-		<!-- <script type="text/javascript" src="js/main.js"></script> -->
-		<script type="text/javascript" src="/static/js/main.js"></script>
+
+		<script src="https://cdn.plot.ly/plotly-latest.min.js"></script> <!-- using latest, should not need to be updated -->
+		<script type="text/javascript" src="/static/js/main.js"></script> <!-- need to change the href if the location of the JS file is changed -->
+
 	</body>
+
 </html>
 
 

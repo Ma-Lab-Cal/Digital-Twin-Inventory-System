@@ -38,6 +38,48 @@ h1{
 
 
 
+/* Buttons */
+button{
+  height: 100%;
+  width: 75%;
+  background: beige;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover{
+  background: lightcyan;
+}
+
+button:active{
+  background: aquamarine;
+}
+
+#takeAM{
+  width: 75%;
+}
+
+#returnAM{
+  width: 75%;
+}
+
+#moveAM{
+  width: 75%;
+}
+
+#moveFROM{
+  width: 75%;
+}
+
+#moveTO{
+  width: 75%;
+  margin-left: -20%;
+}
+/* Buttons */
+
+
+
 /*Head & Foot*/
 header{
   padding-top: 20px;
@@ -64,6 +106,50 @@ footer{
 
 
 /*Columns*/
+.desys{
+  width: 95%;
+  margin: auto;
+  margin-left: 0px;
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+.decol{
+  display: inline-block;
+  float: left;
+  width: 15%;
+}
+
+.amsys{
+  width: 95%;
+  margin: auto;
+  margin-left: 0;
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+.amcol{
+  display: inline-block;
+  float: left;
+  width: 15%;
+}
+
+.amcol2{
+  display: inline-block;
+  float: left;
+  width: 7.5%;
+  text-align: left;
+  margin-left: 2%;
+}
+
+.amcol3{
+  display: inline-block;
+  float: left;
+  width: 7.5%;
+  text-align: left;
+  margin-left: 0%;
+}
+
 .row{
   width: 95vw;
   margin: auto;
@@ -79,7 +165,7 @@ footer{
 .column#flrPlan{
   display: inline-block;
   float: left;
-  width: 35vw;
+  width: 30vw;
 }
 
 .column#eqpList{
@@ -91,7 +177,7 @@ footer{
 .column#envPlot{
   display: inline-block;
   float: right;
-  width: 25vw;
+  width: 30vw;
 }
 
 @media(max-width:1200px){
@@ -213,12 +299,27 @@ button.search:active{
 .search-result:hover{
   background: mintcream;
 }
+
+.search-selected{
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-bottom-color: midnightblue;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding: 5px;
+  cursor: pointer;
+  background: yellow;
+}
+
+.search-selected:hover{
+  background: LemonChiffon;
+}
 /*Search Bar*/
 
 
 
 /*Floor Plan*/
-button.return{
+button.back{
   margin-bottom: 10px;
   height: 30px;
   width: 25%;
@@ -231,11 +332,11 @@ button.return{
   cursor: pointer;
 }
 
-button.return:hover{
+button.back:hover{
   background: khaki;
 }
 
-button.return:active{
+button.back:active{
   background: yellow;
 }
 
@@ -244,6 +345,15 @@ button.return:active{
 }
 
 .image{
+  width: 45%;
+  height: auto;
+  display: inline-block;
+  margin-right: 20px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.map{
   width: 100%;
   height: auto;
 }
@@ -270,6 +380,19 @@ button.return:active{
 
 #eqpList a:active{
   color: orange;
+}
+
+#eqpList a.md{
+  text-decoration: underline;
+  color: blue;
+}
+
+#eqpList a.md:hover{
+  color: orange;
+}
+
+#eqpList a.md:active{
+  color: lime;
 }
 
 #eqpList ul{
@@ -395,19 +518,19 @@ button.clkdedit:active{
   background: orange;
 }
 
-#eqpInfo{
+#addInfo{
   display: block;
   padding-left: 20px;
   padding-right: 30px;
   background: whitesmoke;
 }
 
-#eqpInfo label{
+#addInfo label{
   display: block;
   padding-bottom: 5px;
 }
 
-form#eqpInfo{
+form#addInfo{
   position: relative;
   margin-top: 50px;
 }
@@ -451,6 +574,25 @@ button.submit:active{
   background: lime;
 }
 
+button.delete{
+  margin-bottom: 10px;
+  height: 30px;
+  width: 25%;
+  padding: 5px;
+  background: beige;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+}
+
+button.delete:hover{
+  background: red;
+}
+
+button.delete:active{
+  background: maroon;
+}
+
 #editInfo{
   padding-top: 10px;
   display: block;
@@ -468,6 +610,42 @@ form#editInfo{
   position: relative;
   margin-top: 50px;
 }
+
+#eqpInfo{
+  padding-top: 10px;
+  display: block;
+  padding-left: 20px;
+  padding-right: 30px;
+  background: whitesmoke;
+}
+
+#eqpInfo label{
+  display: block;
+  padding-bottom: 5px;
+}
+
+form#eqpInfo{
+  position: relative;
+  margin-top: 50px;
+}
+
+#sys{
+  padding-top: 10px;
+  display: block;
+  padding-left: 20px;
+  padding-right: 30px;
+  background: whitesmoke;
+}
+
+#sys label{
+  display: block;
+  padding-bottom: 5px;
+}
+
+form#sys{
+  position: relative;
+  margin-top: 50px;
+}
 /*Equipment List*/
 
 
@@ -479,6 +657,8 @@ form#editInfo{
 
 .plots{
   margin-top: 10px;
+  display: inline-block;
+  width: 50%;
 }
 
 button.history{
@@ -560,6 +740,25 @@ button.download:hover{
 button.download:active{
   background: deeppink;
 }
+
+button.intv{
+  margin-bottom: 10px;
+  height: 30px;
+  width: 30%;
+  padding: 5px;
+  background: beige;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+}
+
+button.intv:hover{
+  background: orange;
+}
+
+button.intv:active{
+  background: orangered;
+}
 /*Environmental Plot*/
 
 
@@ -583,3 +782,16 @@ button.download:active{
 
 
 
+.urap-loader {
+  border: 16px solid #CCCCCC; /* Light grey */
+  border-top: 16px solid #666666; /* Blue */
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: urap-spin 0.5s linear infinite;
+}
+
+@keyframes urap-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

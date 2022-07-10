@@ -5,14 +5,14 @@ import time
 
 import serial
 
-ENV_DB_PATH = "environmental_data.db"
-
+ENV_DB_PATH = "C:\\Users\\ma-la\\Documents\\Digital-Twin-Inventory-System\\data\\environmental_data.db"
+COM_PORT = "COM13"
 
 class DataBase:
     def __init__(self, path):
         self.path = path
         
-        self._db = sqlite3.connect(self.path)
+        self._db = sqlite3.connect(self.path, check_same_thread=False)
 
     def createTable(self, table_name, structure):
         self.table_name = table_name
@@ -60,6 +60,19 @@ class DataBase:
         return processed_data
 
 
+def openSerialPort():
+    print("connecting to COM4")
+    ser = None
+    while not ser:
+        try:
+            ser = serial.Serial(COM_PORT, baudrate=115200)
+        except serial.serialutil.SerialException:
+            print("cannot open {0}, waiting...".format("COM4"))
+            time.sleep(5)
+            
+    print("connected")
+    return ser
+
 db = DataBase(ENV_DB_PATH)
 
 structure = [
@@ -77,19 +90,6 @@ structure = [
     ]
 
 db.createTable("EnvironmentalData", structure)
-
-def openSerialPort():
-    print("connecting to COM4")
-    ser = None
-    while not ser:
-        try:
-            ser = serial.Serial("COM4", baudrate=115200)
-        except serial.serialutil.SerialException:
-            print("cannot open {0}, waiting...".format("COM4"))
-            time.sleep(5)
-            
-    print("connected")
-    return ser
 
 ser = openSerialPort()
 
@@ -114,7 +114,7 @@ while True:
 
     data.insert(0, timestamp)  # add timestamp
     
-    #print(data)
+    print("log data", data[1])
     db.insert(data)
 
-    print(db.getData(time.time()-120, time.time()))
+    #print(db.getData(time.time()-120, time.time()))
