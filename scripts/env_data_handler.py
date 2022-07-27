@@ -44,8 +44,11 @@ class DataBase:
         exec_str += ");"
         
         cur = self._db.cursor()
-        cur.execute(exec_str)
-
+        try:
+            cur.execute(exec_str)
+        except sqlite3.IntegrityError:
+            #seldomly we can have timestamp collision
+            return
         self._db.commit()
 
     
@@ -93,6 +96,8 @@ db.createTable("EnvironmentalData", structure)
 
 ser = openSerialPort()
 
+prev_time = time.time()
+
 while True:
     try:
         buffer = ser.readline()
@@ -114,7 +119,10 @@ while True:
 
     data.insert(0, timestamp)  # add timestamp
     
-    print("log data", data[1])
+    #print("log data", data[1])
     db.insert(data)
 
-    #print(db.getData(time.time()-120, time.time()))
+    if (time.time() - prev_time) > 120:
+        print("{0}\tenv data handler still running...".format(time.time()))
+        prev_time = time.time()
+        

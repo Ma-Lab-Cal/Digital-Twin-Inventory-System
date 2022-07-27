@@ -4,11 +4,12 @@
 
 	<head>
 		<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
-		<title>Digital Twin of Ma Labbb</title> <!-- for changing the text displayed on the browser tab -->
+		<title>Digital Twin of Ma Lab</title> <!-- for changing the text displayed on the browser tab -->
 		<link rel="stylesheet" type="text/css" href="/static/css/style.css"> <!-- need to change the href if the location of the CSS file is changed -->
 	</head>
 
 	<body>
+		<a class="lablink" href="https://sites.google.com/berkeley.edu/ma-lab" target="_blank">Lab Website</a>
 		<div id="footerControl"> <!-- for keeping the footer fixed to the bottem of the page -->
 			<div id="footerHelp"> <!-- for keeping all other stuff relative to scrolling -->
 
@@ -21,10 +22,19 @@
 
 					<div id="flrPlan" class="column">
 
-						<h1 class="location">Main Floor Plan</h1>
+						<h1 class="location" id="labName">All Labs</h1>
+						
+						<label for="Lab" id="labslcttag">Current Lab: </label>
+							<select name="Labselect" id="labslct" onchange="labsw()">
+								<option value="All Labs">All Labs</option>
+								<option value="Main Lab">Main Lab</option>
+								<option value="Pre Lab">Pre Lab</option>
+								<option value="Office">Office</option>
+							</select>
 
-						<button type="button" class="back" onclick="return changeImage('/static/img/Plan 01.png')">Back</button>
+						<!-- <button type="button" class="back" onclick="return changeImage('/static/img/Plan 01.png')">Back</button> -->
 
+						<img src="/static/img/user.png" class="user">
 						<img src="/static/img/Plan 00.png" class="map"> <!-- change the default floor plan image here -->
 						<!-- <canvas id="myCanvas" width="1170" height="1140" style="border:1px solid #FF0000;"></canvas> -->
 
@@ -38,14 +48,14 @@
 
 						<form action="process.php" method="POST">
 							<input type="search" name="search" placeholder="Search..." id="searchbar">
-							<button type="submit" class="search" onclick="return false">🔍</button>
+							<button type="button" class="search" onclick="">🔍</button>
 							<div id="autofill" class="dropDownList" onmouseover="this.style.overflow='auto'" onmouseout="this.style.overflow='hidden'"></div> <!-- the logic to hide scrolling bar if not hovered -->
 						</form> <!-- searchbar -->
 
 						<button type="button" class="add" onclick="addEqp()">Add</button>
 						<button type="button" class="edit" onclick="editEqp()">Edit</button>
 						
-						<form id="eqpInfo">
+						<!-- <form id="it">
 							<h1 class="title">No object selected!</h1>
 							<p>Key:</p>
 							<p type="text" id="sku"></p>
@@ -58,19 +68,22 @@
 							<p>Description:</p>
 							<p type="text" id="des"></p>
 							<br>
-						</form> <!-- eqpInfo -->
+						</form> it -->
 
-						<form id="sys">
+						<form id="eqpInfo">
 							<label for="User">Current User:</label>
-							<select name="Username" id="userEnter">
+							<select name="Username" id="userEnter" onchange="newUser()">
 								<option value="">Please Select ...</option>
 								<option value="Student 1">Student 1</option>
 								<option value="Student 2">Student 2</option>
 								<option value="Student 3">Student 3</option>
+								<option value="new">... New User</option>
 							</select>
 							<p>Name:</p>
 							<p class="title">No object selected!</p>
 							<p>Locations:</p>
+							<p type="text" id="uri"></p>
+							<p type="text" id="qty"></p>
 							<div id="locationlist"></div>
 							<div class="desys">
 								<div class="decol"><button type="button" class="take">Take</button></div>
@@ -85,9 +98,23 @@
 								<div class="amcol"><input type="text" name="Move" id="moveAM"></div>
 								<div class="amcol"><button type="button" class="all">All</button></div>
 								<div class="amcol2">from</div>
-								<div class="amcol"><input type="text" name="Move" id="moveFROM"></div>
+								<!-- <div class="amcol"><input type="text" name="Move" id="moveFROM"></div> -->
+								<select name="Location" class="amcol4" onchange="newLocationA()">
+									<option value="">Select ...</option>
+									<option value="Location 0">Location 0</option>
+									<option value="Location 1">Location 1</option>
+									<option value="Location 5">Location 5</option>
+									<option value="new">... New</option>
+								</select>
 								<div class="amcol3">to</div>
-								<div class="amcol"><input type="text" name="Move" id="moveTO"></div>
+								<!-- <div class="amcol"><input type="text" name="Move" id="moveTO"></div> -->
+								<select name="Location" class="amcol4" onchange="newLocationA()">
+									<option value="">Select ...</option>
+									<option value="Location 0">Location 0</option>
+									<option value="Location 1">Location 1</option>
+									<option value="Location 5">Location 5</option>
+									<option value="new">... New</option>
+								</select>
 							</div>
 							<p>Key:</p>
 							<p type="text" id="sku"></p>
@@ -96,7 +123,7 @@
 							<p>Description:</p>
 							<p type="text" id="des"></p>
 							<br>
-						</form> <!-- sys -->
+						</form> <!-- eqpInfo -->
 
 						<form id="editInfo">
 							<label for="Name">Name:</label>
@@ -104,15 +131,24 @@
 							<label for="ID">Key:</label>
 							<p type="text" name="Key" id="skuInfo"></p>
 							<label for="Location">Location:</label>
-							<input type="text" name="Location" id="uriInfo">
+							<!-- <input type="text" name="Location" id="uriInfo"> -->
+
+							<select name="Location" id="uriInfo" onchange="newLocationE()">
+								<option value="">Please Select ...</option>
+								<option value="Location 0">Location 0</option>
+								<option value="Location 1">Location 1</option>
+								<option value="Location 5">Location 5</option>
+								<option value="new">... New Location</option>
+							</select>
+
 							<label for="Quantity">Quantity:</label>
 							<input type="text" name="Quantity" id="qtyInfo">
 							<label for="Tags">Tags:</label>
 							<input type="text" name="Tags" id="tagInfo">
 							<label for="Description">Description:</label>
 							<textarea type="text" name="Description" id="desInfo"></textarea>
-							<button class="submit" type="submit" onclick="editEvent(); return false;">Confirm</button>
-							<button class="delete" type="button" onclick="return false;">Delete</button>
+							<button class="submit" type="button" onclick="editEvent();">Confirm</button>
+							<button class="delete" type="button" onclick="">Delete</button>
 						</form> <!-- editInfo -->
 
 						<form id="addInfo">
@@ -121,14 +157,23 @@
 							<label for="ID">Key:</label>
 							<input type="text" name="Key" id="addsku">
 							<label for="Location">Location:</label>
-							<input type="text" name="Location" id="adduri">
+							<!-- <input type="text" name="Location" id="adduri"> -->
+
+							<select name="Location" id="adduri" onchange="newLocationA()">
+								<option value="">Please Select ...</option>
+								<option value="Location 0">Location 0</option>
+								<option value="Location 1">Location 1</option>
+								<option value="Location 5">Location 5</option>
+								<option value="new">... New Location</option>
+							</select>
+
 							<label for="Quantity">Quantity:</label>
 							<input type="text" name="Quantity" id="addqty">
 							<label for="Tags">Tags:</label>
 							<input type="text" name="Tags" id="addtag">
 							<label for="Description">Description:</label>
 							<textarea type="text" name="Description" id="adddes"></textarea>
-							<button class="submit" type="button" onclick="addEvent(); return false;">Confirm</button>
+							<button class="submit" type="button" onclick="addEvent();">Confirm</button>
 						</form> <!-- addInfo -->
 
 					</div> <!-- eqpList -->
@@ -137,23 +182,14 @@
 
 					<div id="envPlot" class="column">
 
-						<h1>Environmental Plots</h1>
-						<button class="intv" type="button" id="env_data_show_5min_btn">5 min</button>
-						<button class="intv" type="button" id="env_data_show_1hr_btn">1 hrs</button>
-						<button class="intv" type="button" id="env_data_show_12hr_btn">12 hrs</button>
-						<!-- <button class="intv" type="button" id="env_data_show_5min_btn" onclick="interval = 300; historyEvent(); return false">5 min</button>
-						<button class="intv" type="button" id="env_data_show_1hr_btn" onclick="interval = 3600; historyEvent(); return false">1 hrs</button>
-						<button class="intv" type="button" id="env_data_show_12hr_btn" onclick="interval = 43200; historyEvent(); return false">12 hrs</button> -->
+						<h1 id="envTitle">Environmental Plots</h1>
+						<button class="intv" type="button" id="btn5m" onclick="changeInterval ('5m')">5 min</button>
+						<button class="clkdintv" type="button" id="btn1h" onclick="changeInterval ('1h')">1 hrs</button>
+						<button class="intv" type="button" id="btn1d" onclick="changeInterval ('1d')">1 day</button>
+						<button class="intv" type="button" id="btn1w" onclick="changeInterval ('1w')">1 week</button>
 
-						<div id="chart_loading_blocker" class="urap-loader" style="width: 150px; height: 150px; position:absolute; right: 300px; top: 300px; z-index:12;"></div>
+						<div id="chart_loading_blocker" class="urap-loader"></div>
 						<div id="chart" class="plots"></div>
-
-						<!-- <img src="/static/img/Plan 00.png" class="image" id="graph0">
-						<img src="/static/img/Plan 00.png" class="image" id="graph1">
-						<img src="/static/img/Plan 00.png" class="image" id="graph2">
-						<img src="/static/img/Plan 00.png" class="image" id="graph3">
-						<img src="/static/img/Plan 00.png" class="image" id="graph4">
-						<img src="/static/img/Plan 00.png" class="image" id="graph5"> -->
 
 						<button type="button" class="history" onclick="stopPlot()">History</button>
 
@@ -163,8 +199,8 @@
 							<input type="text" name="Interval" id="Interval"> -->
 							<label for="End">End:</label>
 							<input type="text" name="End" id="End">
-							<button class="submit" type="submit" onclick="historyEvent(); return false;">Confirm</button>
-							<button class="download" type="submit" onclick="interval = 300; historyEvent(); return false">Download</button>
+							<button class="submit" type="button" onclick="chart_loading_blocker.style['display'] = 'block'; fetchEnvData();">Confirm</button>
+							<button class="download" type="button" onclick="chart_loading_blocker.style['display'] = 'block'; fetchEnvData();">Download</button>
 						</form> <!-- plotFunc -->
 
 					</div> <!-- envPlot -->

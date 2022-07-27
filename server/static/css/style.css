@@ -34,6 +34,24 @@ a:active{
 h1{
   font-size: 30px;
 }
+
+select{
+  background-color: powderblue;
+  font-size: 20px;
+  border: transparent;
+}
+
+option{
+  background-color: dodgerblue;
+  font-size: 20px;
+  color: gold;
+}
+
+.lablink{
+  position: relative;
+  bottom: 90%;
+  left: 95%;
+}
 /*Global*/
 
 
@@ -150,6 +168,13 @@ footer{
   margin-left: 0%;
 }
 
+.amcol4{
+  display: inline-block;
+  float: left;
+  width: 10%;
+  margin-right: 3%;
+}
+
 .row{
   width: 95vw;
   margin: auto;
@@ -169,6 +194,7 @@ footer{
 }
 
 .column#eqpList{
+  margin-left: -2%;
   display: inline-block;
   float: left;
   width: 30vw;
@@ -323,6 +349,7 @@ button.back{
   margin-bottom: 10px;
   height: 30px;
   width: 25%;
+  margin-right: 75%;
   float: left;
   padding: 5px;
   margin-left: 5%;
@@ -354,8 +381,26 @@ button.back:active{
 }
 
 .map{
-  width: 100%;
+  width: 90%;
   height: auto;
+}
+
+.user{
+  display: block;
+  width: 10%;
+  height: auto;
+  margin-left: 5%;
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
+
+#labslct{
+  margin-bottom: 10px;
+}
+
+#labslcttag{
+  margin-bottom: 10px;
+  margin-right: 5px;
 }
 /*Floor Plan*/
 
@@ -629,7 +674,7 @@ form#eqpInfo{
   margin-top: 50px;
 }
 
-#sys{
+#eqpInfo{
   padding-top: 10px;
   display: block;
   padding-left: 20px;
@@ -637,12 +682,12 @@ form#eqpInfo{
   background: whitesmoke;
 }
 
-#sys label{
+#eqpInfo label{
   display: block;
   padding-bottom: 5px;
 }
 
-form#sys{
+form#eqpInfo{
   position: relative;
   margin-top: 50px;
 }
@@ -655,10 +700,15 @@ form#sys{
   padding: 10px;
 }
 
+#envTitle{
+  margin-left: -10%;
+}
+
 .plots{
   margin-top: 10px;
   display: inline-block;
-  width: 50%;
+  width: 100%;
+  margin-left: -15%;
 }
 
 button.history{
@@ -668,7 +718,7 @@ button.history{
   width: 25%;
   float: left;
   padding: 5px;
-  margin-left: 5%;
+  margin-left: -10%;
   background: beige;
   font-size: 20px;
   border: none;
@@ -690,7 +740,8 @@ button.clkdhistory{
   width: 25%;
   float: left;
   padding: 5px;
-  margin-left: 5%;
+  margin-left: -10%;
+  color: white;
   background: red;
   font-size: 20px;
   border: none;
@@ -710,6 +761,7 @@ button.clkdhistory:active{
   padding-left: 20px;
   padding-right: 30px;
   background: whitesmoke;
+  margin-left: -10%;
 }
 
 #plotFunc label{
@@ -744,12 +796,14 @@ button.download:active{
 button.intv{
   margin-bottom: 10px;
   height: 30px;
-  width: 30%;
+  width: 25%;
   padding: 5px;
   background: beige;
   font-size: 20px;
   border: none;
   cursor: pointer;
+  margin-left: 1%;
+  margin-right: 1%;
 }
 
 button.intv:hover{
@@ -758,6 +812,31 @@ button.intv:hover{
 
 button.intv:active{
   background: orangered;
+}
+
+button.clkdintv{
+  margin-bottom: 10px;
+  height: 30px;
+  width: 25%;
+  padding: 5px;
+  background: tomato;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+  margin-left: 1%;
+  margin-right: 1%;
+}
+
+button.clkdintv:hover{
+  background: orange;
+}
+
+button.clkdintv:active{
+  background: orangered;
+}
+
+button#btn5m{
+margin-left: -9%;
 }
 /*Environmental Plot*/
 
@@ -783,8 +862,14 @@ button.intv:active{
 
 
 .urap-loader {
-  border: 16px solid #CCCCCC; /* Light grey */
-  border-top: 16px solid #666666; /* Blue */
+  width: 150px;
+  height: 150px;
+  position: absolute;
+  left: 77.5%;
+  top: 45%;
+  z-index:12;
+  border: 16px solid lavender;
+  border-top: 16px solid thistle;
   border-radius: 50%;
   width: 120px;
   height: 120px;

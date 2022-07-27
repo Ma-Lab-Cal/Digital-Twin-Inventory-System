@@ -1,121 +1,70 @@
-// Global
+// Global (F)
 let currObj = "";
 let currCat = "";
-function flip(b) {return b = !b;}
 let objInfo = "Equipment Info";
-// document.getElementById("eqpInfo").style.display = "none";
-document.getElementById("editInfo").style.display = "none";
-document.getElementById("addInfo").style.display = "none";
-// document.getElementById("Interval").value = 3600;
-document.getElementById("End").value = timeReader(new Date().getTime() / 1000);
-document.getElementById("plotFunc").style.display = "none";
-document.getElementById('nameinfo').value = "No object selected!";
-// document.getElementById("chart").style.display = "none";
 // Global
 
 
 
-// Markdown
-const markdownParser = (text) => {
+// Initialization (F)
+document.getElementById("editInfo").style.display = "none";
+document.getElementById("addInfo").style.display = "none";
+document.getElementById("plotFunc").style.display = "none";
 
+document.getElementById("End").value = time_to_text(new Date().getTime() / 1000, true);
+document.getElementById('nameinfo').value = "No object selected!";
+// Initialization
+
+
+
+// Markdown (F)
+const markdownReader = (text) => {
     const toHTML = text
-
-        .replaceAll(/\[([^\]]+)\]\(([^\)]+)\)/gim, '<a class="md" href="$2">$1</a>')
-
+        .replaceAll(/\[([^\]]+)\]\(([^\)]+)\)/gim, '<a class="md" href="$2">$1</a>') // hyperlink
         .replaceAll(/^### (.*$)/gim, '<h3>$1</h3>') // h3 tag
-
         .replaceAll(/^## (.*$)/gim, '<h2>$1</h2>') // h2 tag
-
         .replaceAll(/^# (.*$)/gim, '<h1>$1</h1>') // h1 tag
-
         // .replace(/\\(.)\\*/gim, '<b>$1</b>') // bold text
-
         // .replace(/\(.)\*/gim, '<i>$1</i>'); // italic text
-
     return toHTML.trim(); // using trim method to remove whitespace
-
 }
 // Markdown
 
 
 
-// Time
-const d = new Date();
-function timeConverter(timestamp) {
-  var t = new Date(timestamp * 1000);
-  var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  var year = t.getFullYear();
-  var month = months[t.getMonth()];
-  var date = t.getDate();
-  date = date.toString();
-  if (date.length == 1) {
-      date = '0' + date;
-  }
-  var hour = t.getHours();
-  hour = hour.toString();
-  if (hour.length == 1) {
-      hour = '0' + hour;
-  }
-  var min = t.getMinutes();
-  min = min.toString();
-  if (min.length == 1) {
-      min = '0' + min;
-  }
-  var sec = t.getSeconds();
-  sec = sec.toString();
-  if (sec.length == 1) {
-      sec = '0' + sec;
-  }
-  // var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec;
-  var time = month + ' ' + date + ' ' + hour + ':' + min + ':' + sec;
-  return time;
+// Time (F)
+function time_to_text(timestamp, read = false) {
+    var time = new Date(timestamp * 1000);
+    var months = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var year = time.getFullYear();
+    var num = time.getMonth() + 1
+    var month = months[num];
+    num = num.toString();
+    if (num.length == 1) {num = '0' + num;}
+    var day = time.getDate().toString();
+    if (day.length == 1) {day = '0' + day;}
+    var hour = time.getHours().toString();
+    if (hour.length == 1) {hour = '0' + hour;}
+    var min = time.getMinutes().toString();
+    if (min.length == 1) {min = '0' + min;}
+    var sec = time.getSeconds().toString();
+    if (sec.length == 1) {sec = '0' + sec;}
+    if (read) {return time = num + '/' + day + '/' + year + " " + hour + ':' + min + ':' + sec;}
+    // return day + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec;
+    return month + ' ' + day + ' ' + hour + ':' + min + ':' + sec;
 }
 
-function timeReader(timestamp) {
-    var t = new Date(timestamp * 1000);
-    var year = t.getFullYear();
-    var month = t.getMonth() + 1;
-    month = month.toString();
-    if (month.length == 1) {
-        month = '0' + month;
-    }
-    var date = t.getDate();
-    date = date.toString();
-    if (date.length == 1) {
-        date = '0' + date;
-    }
-    var hour = t.getHours();
-    hour = hour.toString();
-    if (hour.length == 1) {
-        hour = '0' + hour;
-    }
-    var min = t.getMinutes();
-    min = min.toString();
-    if (min.length == 1) {
-        min = '0' + min;
-    }
-    var sec = t.getSeconds();
-    sec = sec.toString();
-    if (sec.length == 1) {
-        sec = '0' + sec;
-    }
-    var time = month + '/' + date + '/' + year + " " + hour + ':' + min + ':' + sec;
-    return time;
-  }
-
-function timeRecognizer(texttime) {
-    const [dateComponents, timeComponents] = texttime.split(' ');
-    const [month, day, year] = dateComponents.split('/');
-    const [hours, minutes, seconds] = timeComponents.split(':');
-    const date = new Date(+year, month - 1, +day, +hours, +minutes, +seconds);
-    const unixTimestamp = date.getTime() / 1000;
-    return unixTimestamp;
+function text_to_time(text) {
+    const [date, time] = text.split(' ');
+    const [month, day, year] = date.split('/');
+    const [hour, min, sec] = time.split(':');
+    return new Date(year, month - 1, day, hour, min, sec).getTime();
 }
 // Time
 
 
 
-// JSON
+// Inventory
 var raw_entries = [];
 let objMap = new Map([]);
 var inventory_list = [];
@@ -133,7 +82,7 @@ var inventory_fetchAll = function() {
     socket.addEventListener("message", function(e) {
         let data = JSON.parse(e.data);
         inventory_list = [];
-        for (let i=0; i<data.length; i+=1) {
+        for (let i=0; i<data.length; i+=1) { 
             inventory_list.push(JSON.parse(data[i][1]));
         }
     });
@@ -148,19 +97,7 @@ function useData() {
     }
 }
 setTimeout(useData, 2500);
-
-// async function fetchData() {
-//     let file = 'json/sample.json';
-//     let r = await fetch(file);
-//     return await r.json();
-// }
-// async function useData() {
-//     let s = await fetchData();
-//     for (let i = 0; i < s.length; i += 1) {raw_entries.push(s[i].Name);}
-//     for (let i = 0; i < raw_entries.length; i += 1) {objMap.set(raw_entries[i], s[i]);}
-// }
-// useData();
-// JSON
+// Inventory
 
 
 
@@ -200,7 +137,7 @@ function objSelect(name) {
     document.getElementById("uri").innerHTML = objMap.get(currObj).uri;
     document.getElementById("qty").innerHTML = objMap.get(currObj).qty;
     document.getElementById("tag").innerHTML = objMap.get(currObj).tag;
-    document.getElementById("des").innerHTML = markdownParser(objMap.get(currObj).description);
+    document.getElementById("des").innerHTML = markdownReader(objMap.get(currObj).description);
 
     document.getElementById('nameinfo').value = currObj;
     document.getElementById("skuInfo").innerHTML = objMap.get(currObj).sku;
@@ -236,15 +173,6 @@ const pointMap = new Map([
   [" ", {x:1000, y:1000}],
   ["Daniel", {x:1500, y:1500}]
 ]); // manually set the point locations, become ratios once canvas is used
-
-// const pointMap = new Map([
-//     ["location1", {x:250, y:250}],
-//     ["location2", {x:250, y:500}],
-//     ["location3", {x:500, y:500}],
-//     ["location4", {x:500, y:250}],
-//     ["location5", {x:375, y:375}],
-//     ["location6", {x:400, y:600}]
-//   ]);
 
 let pointStatus = false;
 let childStatus = false;
@@ -302,31 +230,29 @@ let addMode = false;
 function addEqp() {
     addMode = !addMode;
     if (addMode) {
+        add.classList.remove("add");
+        add.classList.add("clkdadd");
         document.getElementById("eqpInfo").style.display = "none";
         document.getElementById("addInfo").style.display = "block";
     } else {
+        add.classList.remove("clkdadd");
+        add.classList.add("add");
         document.getElementById("addInfo").style.display = "none";
         document.getElementById("eqpInfo").style.display = "block";
     }
 }
 
-add.addEventListener('click', function onClick() {
-    if (addMode) {
-        add.classList.remove("add");
-        add.classList.add("clkdadd");
-    } else {
-        add.classList.remove("clkdadd");
-        add.classList.add("add");
-    }
-})
-
 let editMode = false;
 function editEqp() {
     editMode = !editMode;
     if (!editMode) {
+        edit.classList.remove("clkdedit");
+        edit.classList.add("edit");
         document.getElementById("editInfo").style.display = "none";
         document.getElementById("eqpInfo").style.display = "block";
     } else {
+        edit.classList.remove("edit");
+        edit.classList.add("clkdedit");
         document.getElementById("eqpInfo").style.display = "none";
         document.getElementById("editInfo").style.display = "block";
         if (currObj != "") {
@@ -346,16 +272,6 @@ function editEqp() {
         }
     }
 }
-
-edit.addEventListener('click', function onClick() {
-  if (editMode) {
-        edit.classList.remove("edit");
-        edit.classList.add("clkdedit");
-    } else {
-        edit.classList.remove("clkdedit");
-        edit.classList.add("edit");
-    }
-})
 // Add and Edit Buttons
 
 
@@ -372,7 +288,7 @@ var stopit = false;
 function getAddData() {
     var name = document.getElementById('addname').value;
     var sku = document.getElementById('addsku').value;
-    var uri = document.getElementById('adduri').value;
+    var uri = document.getElementById('adduri').options[select.selectedIndex].value;
     var qty = document.getElementById('addqty').value;
     var tag = document.getElementById('addtag').value;
     var des = document.getElementById('adddes').value;
@@ -391,7 +307,7 @@ function getAddData() {
 
 function getEditData() {
     var name = document.getElementById('nameinfo').value;
-    var uri = document.getElementById('uriInfo').value;
+    var uri = document.getElementById('uriInfo').options[select.selectedIndex].value;
     var qty = document.getElementById('qtyInfo').value;
     var tag = document.getElementById('tagInfo').value;
     var des = document.getElementById('desInfo').value;
@@ -513,32 +429,26 @@ function editEvent() {
 
 
 
-// History & Download
+// History (F)
 const history = document.querySelector('.history');
 let historyMode = false;
-history.addEventListener('click', function onClick() {
+function stopPlot() {
+    historyMode = !historyMode;
     if (historyMode) {
         history.classList.remove("history");
         history.classList.add("clkdhistory");
+        history.innerHTML = 'Present';
+        document.getElementById("plotFunc").style.display = "block";
+        document.getElementById("End").value = time_to_text(new Date().getTime() / 1000, true);
     } else {
+        document.getElementById("End").value = time_to_text(new Date().getTime() / 1000, true);
+        document.getElementById("plotFunc").style.display = "none";
+        history.innerHTML = 'History';
         history.classList.add("history");
         history.classList.remove("clkdhistory");
     }
-})
-function stopPlot() {
-    historyMode = !historyMode;
-    historyEvent();
-    if (!historyMode) {
-        // document.getElementById("Interval").value = 3600;
-        document.getElementById("End").value = timeReader(new Date().getTime() / 1000);
-        document.getElementById("plotFunc").style.display = "none";
-    } else {
-        document.getElementById("plotFunc").style.display = "block";
-        // document.getElementById("Interval").value = 3600;
-        document.getElementById("End").value = timeReader(new Date().getTime() / 1000);
-    }
 }
-// History & Download
+// History
 
 
 
@@ -628,74 +538,47 @@ setTimeout(window.onload = function() {
 
 
 // Data Fetch
-var env_data = [];
-var node0 = [];
-var node1 = [];
-var node2 = [];
-var interval = 3600;
-// var interval = 300;
-var end = new Date().getTime() / 1000;
-var env_fetch = function() {
-    var socket = new WebSocket("ws://localhost:8000");
-    socket.addEventListener("open", function(e) {
-        var request = {
-            "method": "GET",
-            "params": {
-                "type": "range",
-                // "range": [end - interval * numRooms, end]
-                "range": [end - interval * 2, end]
-            }
-        }
-        socket.send(JSON.stringify(request)+"\n");
-    });
-    socket.addEventListener("message", function(e) {
-    let data = JSON.parse(e.data);
-    env_data = data.data;
-    node0 = [];
-    node1 = [];
-    node2 = [];
-    for (var i = 0; i < env_data.length; i += 1) {
-        if (env_data[i][1] == "node0") {
-            node0.push(env_data[i]);
-            node2.push(env_data[i]);
-        } else if (env_data[i][1] == "node1") {
-            node1.push(env_data[i]);
-        } else if (env_data[i][1] == "node5") {
-            node2.push(env_data[i]);
-        }
-    }
-    });
-};
-
 var g_plot_data = [
-  {x: [], y: [], xaxis: "x1", yaxis: "y1", legendgroup: "1", name: "Room 0", mode: "lines", type: "scatter"},
-  {x: [], y: [], xaxis: "x1", yaxis: "y1", legendgroup: "2", name: "Room 1", mode: "lines", type: "scatter"},
-  {x: [], y: [], xaxis: "x1", yaxis: "y1", legendgroup: "3", name: "Room 2", mode: "lines", type: "scatter"},
+  {x: [], y: [], xaxis: "x1", yaxis: "y1", legendgroup: "1", name: "Room 0", mode: "lines", type: "scatter", showlegend: false},
+  {x: [], y: [], xaxis: "x1", yaxis: "y1", legendgroup: "2", name: "Room 1", mode: "lines", type: "scatter", showlegend: false},
+  {x: [], y: [], xaxis: "x1", yaxis: "y1", legendgroup: "3", name: "Room 2", mode: "lines", type: "scatter", showlegend: false},
   {x: [], y: [], xaxis: "x2", yaxis: "y2", legendgroup: "1", name: "Room 0", mode: "lines", type: "scatter", showlegend: false},
   {x: [], y: [], xaxis: "x2", yaxis: "y2", legendgroup: "2", name: "Room 1", mode: "lines", type: "scatter", showlegend: false},
   {x: [], y: [], xaxis: "x2", yaxis: "y2", legendgroup: "3", name: "Room 2", mode: "lines", type: "scatter", showlegend: false},
-  {x: [], y: [], xaxis: "x3", yaxis: "y3", legendgroup: "1", name: "Room 0", mode: "lines", type: "scatter", showlegend: false},
-  {x: [], y: [], xaxis: "x3", yaxis: "y3", legendgroup: "2", name: "Room 1", mode: "lines", type: "scatter", showlegend: false},
-  {x: [], y: [], xaxis: "x3", yaxis: "y3", legendgroup: "3", name: "Room 2", mode: "lines", type: "scatter", showlegend: false},
+  {x: [], y: [], xaxis: "x3", yaxis: "y3", legendgroup: "1", name: "Room 0", mode: "lines", type: "scatter"},
+  {x: [], y: [], xaxis: "x3", yaxis: "y3", legendgroup: "2", name: "Room 1", mode: "lines", type: "scatter"},
+  {x: [], y: [], xaxis: "x3", yaxis: "y3", legendgroup: "3", name: "Room 2", mode: "lines", type: "scatter"},
   {x: [], y: [], xaxis: "x4", yaxis: "y4", legendgroup: "1", name: "Room 0", mode: "lines", type: "scatter", showlegend: false},
   {x: [], y: [], xaxis: "x4", yaxis: "y4", legendgroup: "2", name: "Room 1", mode: "lines", type: "scatter", showlegend: false},
   {x: [], y: [], xaxis: "x4", yaxis: "y4", legendgroup: "3", name: "Room 2", mode: "lines", type: "scatter", showlegend: false},
+  {x: [], y: [], xaxis: "x5", yaxis: "y5", legendgroup: "1", name: "Room 0", mode: "lines", type: "scatter", showlegend: false},
+  {x: [], y: [], xaxis: "x5", yaxis: "y5", legendgroup: "2", name: "Room 1", mode: "lines", type: "scatter", showlegend: false},
+  {x: [], y: [], xaxis: "x5", yaxis: "y5", legendgroup: "3", name: "Room 2", mode: "lines", type: "scatter", showlegend: false},
+  {x: [], y: [], xaxis: "x6", yaxis: "y6", legendgroup: "1", name: "Room 0", mode: "lines", type: "scatter", showlegend: false},
+  {x: [], y: [], xaxis: "x6", yaxis: "y6", legendgroup: "2", name: "Room 1", mode: "lines", type: "scatter", showlegend: false},
+  {x: [], y: [], xaxis: "x6", yaxis: "y6", legendgroup: "3", name: "Room 2", mode: "lines", type: "scatter", showlegend: false}
   ];
 
-var past_time_range = 5*60; // default to be 5 minutes
+var range = 60 * 60; // default to be 1 hour
+var end = new Date().getTime();
+
+const keys = ["timestamp", "node", "temperature", "humidity", "pm1_0", "pm2_5", "pm10", "magnetic_x", "magnetic_y", "magnetic_z", "lux"];
 
 var fetchEnvData = function() {
   var socket = new WebSocket("ws://localhost:8000");
 
-  var end = new Date().getTime();
-  var interval = past_time_range;
+  end = new Date().getTime();
+
+  if (historyMode) {
+    end = text_to_time(document.getElementById('End').value);
+  }
 
   socket.addEventListener("open", function(e) {
     var request = {
       "method": "GET",
       "params": {
         "type": "range",
-        "range": [new Date(end).getTime() / 1000 - interval, new Date(end).getTime() / 1000]
+        "range": [new Date(end).getTime() / 1000 - range, new Date(end).getTime() / 1000]
       }
     }
     socket.send(JSON.stringify(request)+"\n");
@@ -704,6 +587,10 @@ var fetchEnvData = function() {
   socket.addEventListener("message", function(e) {
     let data = JSON.parse(e.data);
     let data_records = data.data;
+
+    for (idx in data_records) {
+        data_records[idx][0] = parseInt(data_records[idx][0] - new Date(end).getTime() / 1000);
+    }
 
     updatePlot(data_records);
     chart_loading_blocker.style["display"] = "none";
@@ -716,43 +603,39 @@ var fetchEnvData = function() {
 
 // Data Plot
 var layout = {
-    legend: {"orientation": "v", x: 1, y: 1, yanchor: 'top', xanchor: 'right', font: {family: 'Arial, Helvrtica, sans-serif', size: 10, color: '#000000'}, bgcolor: 'rgba(0, 0, 0, 0)'},
+    legend: {"orientation": "v", x: 1, y: 0.98, yanchor: 'top', xanchor: 'right', font: {family: 'Arial, Helvrtica, sans-serif', size: 10, color: '#000000'}, bgcolor: 'rgba(0, 0, 0, 0)'},
     colorway: ['darkorange', 'seagreen', 'royalblue', 'darkorange', 'seagreen', 'royalblue', 'darkorange', 'seagreen', 'royalblue'],
-    grid: {rows: 4, columns: 1, roworder: 'bottom to top', pattern: 'independent', ygap: 0.05},
-    autosize: false, width: 445, height: 900,
+    grid: {rows: 3, columns: 2, roworder: 'bottom to top', pattern: 'independent', ygap: 0.05},
+    autosize: false, width: 1200, height: 900,
     margin: {l: 25, r: 25, b: 10, t: 10, pad: 0},
     annotations: [
-    {text: "Temperature", font: {size: 15, color: 'black'}, showarrow: false, align: 'center', x: 0, y: 1, xref: 'x1 domain', yref: 'y1 domain'},
-    {text: "Humidity", font: {size: 15, color: 'black'}, showarrow: false, align: 'center', x: 0, y: 1, xref: 'x2 domain', yref: 'y2 domain'},
-    {text: "PM 2.5", font: {size: 15, color: 'black'}, showarrow: false, align: 'center', x: 0, y: 1, xref: 'x3 domain', yref: 'y3 domain'},
-    {text: "Light", font: {size: 15, color: 'black'}, showarrow: false, align: 'center', x: 0, y: 1, xref: 'x4 domain', yref: 'y4 domain'}
+    {text: "Temperature", font: {size: 15, color: 'black'}, showarrow: false, align: 'center', x: 0.01, y: 1, xref: 'x1 domain', yref: 'y1 domain'},
+    {text: "Humidity", font: {size: 15, color: 'black'}, showarrow: false, align: 'center', x: 0.01, y: 1, xref: 'x2 domain', yref: 'y2 domain'},
+    {text: "PM 2.5", font: {size: 15, color: 'black'}, showarrow: false, align: 'center', x: 0.01, y: 1, xref: 'x3 domain', yref: 'y3 domain'},
+    {text: "Brightness", font: {size: 15, color: 'black'}, showarrow: false, align: 'center', x: 0.01, y: 1, xref: 'x4 domain', yref: 'y4 domain'},
+    {text: "Magnetic X", font: {size: 15, color: 'black'}, showarrow: false, align: 'center', x: 0.01, y: 1, xref: 'x5 domain', yref: 'y5 domain'},
+    {text: "Magnetic Y", font: {size: 15, color: 'black'}, showarrow: false, align: 'center', x: 0.01, y: 1, xref: 'x6 domain', yref: 'y6 domain'}
     ],
     xaxis1: {automargin: true, tickangle: 90, title: {standoff: 10, text: 'Time', font: {family: 'Arial, Helvrtica, sans-serif', size: 15, color: '#000000'}}, zeroline: false, showgrid: false, showline: true, showticklabels: true, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',},
-    xaxis2: {zeroline: false, showgrid: false, showline: true, showticklabels: false, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',},
+    xaxis2: {automargin: true, tickangle: 90, title: {standoff: 10, text: 'Time', font: {family: 'Arial, Helvrtica, sans-serif', size: 15, color: '#000000'}}, zeroline: false, showgrid: false, showline: true, showticklabels: true, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',},
     xaxis3: {zeroline: false, showgrid: false, showline: true, showticklabels: false, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',},
     xaxis4: {zeroline: false, showgrid: false, showline: true, showticklabels: false, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',},
+    xaxis5: {zeroline: false, showgrid: false, showline: true, showticklabels: false, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',},
+    xaxis6: {zeroline: false, showgrid: false, showline: true, showticklabels: false, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',},
     yaxis1: {automargin: true, title: {standoff: 10, text: '°C', font: {family: 'Arial, Helvrtica, sans-serif', size: 15, color: '#000000'}}, zeroline: false, showgrid: false, showline: true, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',},
     yaxis2: {automargin: true, title: {standoff: 10, text: '%', font: {family: 'Arial, Helvrtica, sans-serif', size: 15, color: '#000000'}}, zeroline: false, showgrid: false, showline: true, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',},
     yaxis3: {automargin: true, title: {standoff: 10, text: 'μg/m³', font: {family: 'Arial, Helvrtica, sans-serif', size: 15, color: '#000000'}}, zeroline: false, showgrid: false, showline: true, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',},
-    yaxis4: {automargin: true, title: {standoff: 10, text: 'lx', font: {family: 'Arial, Helvrtica, sans-serif', size: 15, color: '#000000'}}, zeroline: false, showgrid: false, showline: true, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',}
+    yaxis4: {automargin: true, title: {standoff: 10, text: 'lux', font: {family: 'Arial, Helvrtica, sans-serif', size: 15, color: '#000000'}}, zeroline: false, showgrid: false, showline: true, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',},
+    yaxis5: {automargin: true, title: {standoff: 10, text: 'mT', font: {family: 'Arial, Helvrtica, sans-serif', size: 15, color: '#000000'}}, zeroline: false, showgrid: false, showline: true, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',},
+    yaxis6: {automargin: true, title: {standoff: 10, text: 'mT', font: {family: 'Arial, Helvrtica, sans-serif', size: 15, color: '#000000'}}, zeroline: false, showgrid: false, showline: true, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',}
     };
 
-// var data = [
-//       {x: [], y: [], xaxis: "x1", yaxis: "y1", legendgroup: "1", name: "Room 1", mode: "lines", type: "scatter"},
-//       {x: [], y: [], xaxis: "x1", yaxis: "y1", legendgroup: "2", name: "Room 2", mode: "lines", type: "scatter"},
-//       {x: [], y: [], xaxis: "x1", yaxis: "y1", legendgroup: "3", name: "Room 3", mode: "lines", type: "scatter"},
-//       {x: [], y: [], xaxis: "x2", yaxis: "y2", legendgroup: "1", name: "Room 1", mode: "lines", type: "scatter", showlegend: false},
-//       {x: [], y: [], xaxis: "x2", yaxis: "y2", legendgroup: "2", name: "Room 2", mode: "lines", type: "scatter", showlegend: false},
-//       {x: [], y: [], xaxis: "x2", yaxis: "y2", legendgroup: "3", name: "Room 3", mode: "lines", type: "scatter", showlegend: false},
-//       {x: [], y: [], xaxis: "x3", yaxis: "y3", legendgroup: "1", name: "Room 1", mode: "lines", type: "scatter", showlegend: false},
-//       {x: [], y: [], xaxis: "x3", yaxis: "y3", legendgroup: "2", name: "Room 2", mode: "lines", type: "scatter", showlegend: false},
-//       {x: [], y: [], xaxis: "x3", yaxis: "y3", legendgroup: "3", name: "Room 3", mode: "lines", type: "scatter", showlegend: false},
-//       ];
-
-let numPlots = 3;
+let numPlots = 8;
 let numRooms = 3;
-
-const keys = ["timestamp", "node", "temperature", "humidity", "pm1_0", "pm2_5", "pm10", "magnetic_x", "magnetic_y", "magnetic_z", "lux"];
+let placement = 0;
+let tm = end - range;
+let tmstmp = "";
+let alignto = "";
 
 /**
  * Renders the plot with updated data. This function will filter out invalid data.
@@ -766,176 +649,147 @@ var updatePlot = function(data_records) {
     g_plot_data[idx].y = [];
   }
 
+  alignto = data_records[0][keys.indexOf("node")];
+
   for (var i=0; i<data_records.length; i+=1) {
+    if (data_records[i][keys.indexOf("node")] == alignto) {
+      tm = end / 1000 + data_records[i][keys.indexOf("timestamp")];
+    }
+    tmstmp = new Date(tm * 1000);
     switch (data_records[i][keys.indexOf("node")]) {
       case "node0":
-        // update temperature
-        if (data_records[i][keys.indexOf("temperature")] != -1)
-          g_plot_data[0].y.push(data_records[i][keys.indexOf("temperature")] - 273.15);
-        g_plot_data[0].x.push(data_records[i][keys.indexOf("timestamp")]);
-        // update humidity
-        if (data_records[i][keys.indexOf("humidity")] != -1)
-          g_plot_data[3].y.push(data_records[i][keys.indexOf("humidity")] * 100);
-        g_plot_data[3].x.push(data_records[i][keys.indexOf("timestamp")]);
-        // update pm2.5
-        if (data_records[i][keys.indexOf("pm2_5")] != -1)
-          g_plot_data[6].y.push(data_records[i][keys.indexOf("pm2_5")]);
-        g_plot_data[6].x.push(data_records[i][keys.indexOf("timestamp")]);
-        // update fiat lux
-        if (data_records[i][keys.indexOf("lux")] != -1)
-          g_plot_data[9].y.push(data_records[i][keys.indexOf("lux")]);
-        g_plot_data[9].x.push(data_records[i][keys.indexOf("timestamp")]);
+        placement = 0;
         break;
       case "node1":
-        // update temperature
-        if (data_records[i][keys.indexOf("temperature")] != -1)
-          g_plot_data[1].y.push(data_records[i][keys.indexOf("temperature")] - 273.15);
-        g_plot_data[1].x.push(data_records[i][keys.indexOf("timestamp")]);
-        // update humidity
-        if (data_records[i][keys.indexOf("humidity")] != -1)
-          g_plot_data[4].y.push(data_records[i][keys.indexOf("humidity")] * 100);
-        g_plot_data[4].x.push(data_records[i][keys.indexOf("timestamp")]);
-        // update pm2.5
-        if (data_records[i][keys.indexOf("pm2_5")] != -1)
-          g_plot_data[7].y.push(data_records[i][keys.indexOf("pm2_5")]);
-        g_plot_data[7].x.push(data_records[i][keys.indexOf("timestamp")]);
-        if (data_records[i][keys.indexOf("lux")] != -1)
-          g_plot_data[10].y.push(data_records[i][keys.indexOf("lux")]);
-        g_plot_data[10].x.push(data_records[i][keys.indexOf("timestamp")]);
+        placement = 1;
         break;
       case "node5":
-        // update temperature
-        if (data_records[i][keys.indexOf("temperature")] != -1)
-          g_plot_data[2].y.push(data_records[i][keys.indexOf("temperature")] - 273.15);
-        g_plot_data[2].x.push(data_records[i][keys.indexOf("timestamp")]);
-        // update humidity
-        if (data_records[i][keys.indexOf("humidity")] != -1)
-          g_plot_data[5].y.push(data_records[i][keys.indexOf("humidity")] * 100);
-        g_plot_data[5].x.push(data_records[i][keys.indexOf("timestamp")]);
-        // update pm2.5
-        if (data_records[i][keys.indexOf("pm2_5")] != -1)
-          g_plot_data[8].y.push(data_records[i][keys.indexOf("pm2_5")]);
-        g_plot_data[8].x.push(data_records[i][keys.indexOf("timestamp")]);
-        if (data_records[i][keys.indexOf("lux")] != -1)
-          g_plot_data[11].y.push(data_records[i][keys.indexOf("lux")]);
-        g_plot_data[11].x.push(data_records[i][keys.indexOf("timestamp")]);
+        placement = 2;
         break;
+      default:
+        placement = -1;
+        break;
+    }
+    if (placement == -1) {
+      break;
+    }
+    const updatelist = ["temperature", "humidity", "pm2_5", "lux", "magnetic_x", "magnetic_y"];
+    for (let item in updatelist) {
+      if (data_records[i][keys.indexOf(updatelist[item])] != -1) {
+        let pushpoint = data_records[i][keys.indexOf(updatelist[item])];
+        if (updatelist[item] == "temperature") {
+          pushpoint -= 273.15;
+        }
+        if (updatelist[item] == "humidity") {
+          pushpoint *= 100;
+        }
+        g_plot_data[placement].y.push(pushpoint);
+        g_plot_data[placement].x.push(tmstmp);
+      }
+      placement += numRooms;
     }
   }
   Plotly.redraw("chart");
 }
 
-// function getData() {return Math.random();}
-function getData(l, p, r) {
-    if (r == 0) {
-        switch (p) {
-            case 0:
-            return node0[l][keys.indexOf("temperature")];
-            case 1:
-            return node0[l][keys.indexOf("humidity")] * 100;
-            case 2:
-            return node0[l][keys.indexOf("pm2_5")];
-        }
-    } else if (r == 1) {
-        switch (p) {
-            case 0:
-            return node1[l]["temperature"];
-            case 1:
-            return node1[l]["humidity"] * 100;
-            case 2:
-            return node1[l]["pm2_5"];
-        }
-    } else if (r == 2) {
-        switch (p) {
-            case 0:
-            return node0[l]["temperature"];
-            case 1:
-            return node0[l]["humidity"] * 100;
-            case 2:
-            return node0[l]["pm2_5"];
-        }
-    }
-}
-
-// function growth(i) {return timeConverter(env_data[numRooms * i]["timestamp"]);}
-function growth(i) {return timeConverter(env_data[i * 2]["timestamp"]);}
-
 Plotly.plot("chart", g_plot_data, layout);
 
-function getHistoryData() {
-    if (!historyMode) {
-        end = new Date().getTime() / 1000;
-    } else {
-        var en = document.getElementById('End').value;
-        end = timeRecognizer(en);
+function changeInterval(btn) {
+    let target = btn1h;
+    chart_loading_blocker.style["display"] = "block";
+    btn5m.classList.remove("clkdintv");
+    btn5m.classList.add("intv");
+    btn1h.classList.remove("clkdintv");
+    btn1h.classList.add("intv");
+    btn1d.classList.remove("clkdintv");
+    btn1d.classList.add("intv");
+    btn1w.classList.remove("clkdintv");
+    btn1w.classList.add("intv");
+    switch (btn) {
+        case "5m":
+            target = btn5m;
+            range = 5 * 60;
+            break;
+        case "1h":
+            range = 60 * 60;
+            target = btn1h;
+            break;
+        case "1d":
+            range = 24 * 60 * 60;
+            target = btn1d;
+            break;
+        case "1w":
+            range = 7 * 24 * 60 * 60;
+            target = btn1w;
+            break;
     }
-    return false;
+    target.classList.add("clkdintv");
+    target.classList.remove("intv");
+    fetchEnvData();
 }
-
-var sub = 1;
-
-function historyEvent() {
-    getHistoryData();
-    env_fetch();
-    let lul = Math.min(node0.length, node1.length, node2.length);
-    sub = Math.floor(lul / 300);
-    for (var l = 0; l < lul; l += sub) {
-        for (var i = 0; i < numPlots; i += 1) {
-            for (var j = 0; j < numRooms; j += 1){
-                data[i * numPlots + j].x.push(growth(l));
-                // data[i * numPlots + j].y.push(getData());
-                data[i * numPlots + j].y.push(getData(l, i, j));
-                data[i * numPlots + j].x = data[i * numPlots + j].x.slice(-(lul / 2) / sub);
-                data[i * numPlots + j].y = data[i * numPlots + j].y.slice(-(lul / 2) / sub);
-            }
-        }
-    }
-    Plotly.redraw('chart');
-}
-
-var renderPressedButton = function(target_btn) {
-  chart_loading_blocker.style["display"] = "block";
-
-  env_data_show_5min_btn.style["border-style"] = "";
-  env_data_show_1hr_btn.style["border-style"] = "";
-  env_data_show_12hr_btn.style["border-style"] = "";
-  target_btn.style["border-style"] = "inset";
-}
-
-
-env_data_show_5min_btn.addEventListener("click", function() {
-  renderPressedButton(this);
-  past_time_range = 5 * 60;
-  fetchEnvData();
-});
-
-env_data_show_1hr_btn.addEventListener("click", function() {
-  renderPressedButton(this);
-  past_time_range = 60 * 60;
-  fetchEnvData();
-});
-
-env_data_show_12hr_btn.addEventListener("click", function() {
-  renderPressedButton(this);
-  past_time_range = 12 * 60 * 60;
-  fetchEnvData();
-});
-
 
 setInterval(function() {
-    // if (!historyMode) {
-    //     historyEvent();
-    // }
-  fetchEnvData();
-}, 1000);
+    if (!historyMode) {
+        fetchEnvData();
+    }
+}, 5000);
 
 window.onload = function() {
   fetchEnvData();
 }
+// Data Plot
+
+
+// Lab Selection
+function labsw() {
+    var labSelector = document.getElementById('labslct');
+    var labChoice = labSelector.options[labSelector.selectedIndex].value;
+    var labName = document.getElementById('labName');
+    labName.innerHTML = labChoice;
+    switch (labChoice) {
+        case "Main Lab":
+            changeImage("/static/img/Plan 00.png");
+            break;
+        case "All Labs":
+            changeImage("/static/img/Plan 00.png");
+            break;
+        case "Pre Lab":
+            changeImage("/static/img/Plan 01.png");
+            break;
+        case "Office":
+            changeImage("/static/img/Plan 01.png");
+            break;
+    }
+}
+// Lab Selection
 
 
 
+// New Location/User
+function newLocationE() {
+    var locSelector = document.getElementById('uriInfo');
+    var locChoice = locSelector.options[locSelector.selectedIndex].value;
+    if (locChoice == "new") {
+        return false;
+    }
+    return false;
+}
 
+function newLocationA() {
+    var locSelector = document.getElementById('adduri');
+    var locChoice = locSelector.options[locSelector.selectedIndex].value;
+    if (locChoice == "new") {
+        return false;
+    }
+    return false;
+}
 
-
-
+function newUser() {
+    var usrSelector = document.getElementById('userEnter');
+    var usrChoice = usrSelector.options[usrSelector.selectedIndex].value;
+    if (usrChoice == "new") {
+        return false;
+    }
+    return false;
+}
+// New Location/User
