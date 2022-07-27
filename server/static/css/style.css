@@ -765,7 +765,7 @@ button.clkdhistory:active{
 }
 
 #plotFunc label{
-  display: block;
+  display: inline-block;
   padding-bottom: 5px;
 }
 
@@ -774,8 +774,38 @@ form#plotFunc{
   margin-top: 50px;
 }
 
-button.download{
+#End {
+  margin-left: 1%;
+  margin-right: 1%;
+}
+
+button#submit{
+  display: inline-block;
+  margin-left: 1%;
   margin-bottom: 10px;
+  margin-top: 10px;
+  height: 30px;
+  width: 25%;
+  padding: 5px;
+  background: beige;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+}
+
+button#submit:hover{
+  background: palegreen;
+}
+
+button#submit:active{
+  background: lime;
+}
+
+button#download{
+  display: inline-block;
+  margin-left: 1%;
+  margin-bottom: 10px;
+  margin-top: 10px;
   height: 30px;
   width: 30%;
   padding: 5px;
@@ -785,11 +815,11 @@ button.download{
   cursor: pointer;
 }
 
-button.download:hover{
+button#download:hover{
   background: pink;
 }
 
-button.download:active{
+button#download:active{
   background: deeppink;
 }
 

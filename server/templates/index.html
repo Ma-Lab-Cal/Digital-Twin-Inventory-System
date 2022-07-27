@@ -6,6 +6,7 @@
 		<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
 		<title>Digital Twin of Ma Lab</title> <!-- for changing the text displayed on the browser tab -->
 		<link rel="stylesheet" type="text/css" href="/static/css/style.css"> <!-- need to change the href if the location of the CSS file is changed -->
+
 	</head>
 
 	<body>
@@ -13,8 +14,8 @@
 		<div id="footerControl"> <!-- for keeping the footer fixed to the bottem of the page -->
 			<div id="footerHelp"> <!-- for keeping all other stuff relative to scrolling -->
 
-				<header> <!-- add header if needed, can be used as a navigation bar -->
-				</header>
+				<!-- add header if needed, can be used as a navigation bar -->
+				<!-- <header></header> -->
 
 				<div class="row"> <!-- a simple column system, this is the container for all columns -->
 
@@ -48,13 +49,16 @@
 
 						<form action="process.php" method="POST">
 							<input type="search" name="search" placeholder="Search..." id="searchbar">
-							<button type="button" class="search" onclick="">🔍</button>
+							<button type="button" class="search" id="search_btn_dom">🔍</button>
 							<div id="autofill" class="dropDownList" onmouseover="this.style.overflow='auto'" onmouseout="this.style.overflow='hidden'"></div> <!-- the logic to hide scrolling bar if not hovered -->
 						</form> <!-- searchbar -->
 
 						<button type="button" class="add" onclick="addEqp()">Add</button>
 						<button type="button" class="edit" onclick="editEqp()">Edit</button>
 						
+						<div id="list_itself_dom">
+							Test
+						</div>
 						<!-- <form id="it">
 							<h1 class="title">No object selected!</h1>
 							<p>Key:</p>
@@ -191,16 +195,13 @@
 						<div id="chart_loading_blocker" class="urap-loader"></div>
 						<div id="chart" class="plots"></div>
 
-						<button type="button" class="history" onclick="stopPlot()">History</button>
+						<button type="button" class="history" onclick="chart_loading_blocker.style['display'] = 'block'; stopPlot();">History</button>
 
 						<form id="plotFunc">
-							<!-- <label>Formatted as MM/DD/YYYY hh:mm:ss</label>
-							<label for="Start">Interval:</label>
-							<input type="text" name="Interval" id="Interval"> -->
-							<label for="End">End:</label>
-							<input type="text" name="End" id="End">
-							<button class="submit" type="button" onclick="chart_loading_blocker.style['display'] = 'block'; fetchEnvData();">Confirm</button>
-							<button class="download" type="button" onclick="chart_loading_blocker.style['display'] = 'block'; fetchEnvData();">Download</button>
+							<label for="End" id="End">End:</label>
+							<input type="datetime-local" id="End">
+							<button id="submit" type="button" onclick="chart_loading_blocker.style['display'] = 'block'; fetchEnvData();">Confirm</button>
+							<button id="download" type="button" onclick="chart_loading_blocker.style['display'] = 'block'; fetchEnvData();">Download</button>
 						</form> <!-- plotFunc -->
 
 					</div> <!-- envPlot -->
@@ -219,6 +220,9 @@
 		<script src="https://cdn.plot.ly/plotly-latest.min.js"></script> <!-- using latest, should not need to be updated -->
 		<script type="text/javascript" src="/static/js/main.js"></script> <!-- need to change the href if the location of the JS file is changed -->
 
+		
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiOnLoadHandler()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisOnLoadHandler()"></script>
 	</body>
 
 </html>

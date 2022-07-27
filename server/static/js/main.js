@@ -10,8 +10,8 @@ let objInfo = "Equipment Info";
 document.getElementById("editInfo").style.display = "none";
 document.getElementById("addInfo").style.display = "none";
 document.getElementById("plotFunc").style.display = "none";
-
-document.getElementById("End").value = time_to_text(new Date().getTime() / 1000, true);
+let now = new Date();
+document.getElementById("End").value = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);//time_to_text(new Date().getTime() / 1000, true);
 document.getElementById('nameinfo').value = "No object selected!";
 // Initialization
 
@@ -438,15 +438,19 @@ function stopPlot() {
         history.classList.remove("history");
         history.classList.add("clkdhistory");
         history.innerHTML = 'Present';
+        let now = new Date();
+        console.log(new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16));
+        document.getElementById("End").value = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
         document.getElementById("plotFunc").style.display = "block";
-        document.getElementById("End").value = time_to_text(new Date().getTime() / 1000, true);
     } else {
-        document.getElementById("End").value = time_to_text(new Date().getTime() / 1000, true);
         document.getElementById("plotFunc").style.display = "none";
+        let now = new Date();
+        document.getElementById("End").value = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
         history.innerHTML = 'History';
         history.classList.add("history");
         history.classList.remove("clkdhistory");
     }
+    fetchEnvData();
 }
 // History
 
@@ -570,7 +574,8 @@ var fetchEnvData = function() {
   end = new Date().getTime();
 
   if (historyMode) {
-    end = text_to_time(document.getElementById('End').value);
+    end = Date.parse(document.getElementById('End').value); //2022-07-26T23:19 1658902740000
+    // console.log(new Date().toISOString().slice(0, 16));
   }
 
   socket.addEventListener("open", function(e) {
@@ -606,7 +611,7 @@ var layout = {
     legend: {"orientation": "v", x: 1, y: 0.98, yanchor: 'top', xanchor: 'right', font: {family: 'Arial, Helvrtica, sans-serif', size: 10, color: '#000000'}, bgcolor: 'rgba(0, 0, 0, 0)'},
     colorway: ['darkorange', 'seagreen', 'royalblue', 'darkorange', 'seagreen', 'royalblue', 'darkorange', 'seagreen', 'royalblue'],
     grid: {rows: 3, columns: 2, roworder: 'bottom to top', pattern: 'independent', ygap: 0.05},
-    autosize: false, width: 1200, height: 900,
+    autosize: false, width: 1200, height: 1000,
     margin: {l: 25, r: 25, b: 10, t: 10, pad: 0},
     annotations: [
     {text: "Temperature", font: {size: 15, color: 'black'}, showarrow: false, align: 'center', x: 0.01, y: 1, xref: 'x1 domain', yref: 'y1 domain'},
@@ -732,10 +737,11 @@ setInterval(function() {
     if (!historyMode) {
         fetchEnvData();
     }
-}, 5000);
+}, 1000);
 
 window.onload = function() {
   fetchEnvData();
+//   handleAuthClick();
 }
 // Data Plot
 
@@ -793,3 +799,115 @@ function newUser() {
     return false;
 }
 // New Location/User
+
+
+
+
+
+      /* exported gapiLoaded */
+      /* exported gisLoaded */
+      /* exported handleAuthClick */
+      /* exported handleSignoutClick */
+
+      // TODO(developer): Set to client ID and API key from the Developer Console
+      const CLIENT_ID = "968225988580-1r4j1b3ooh2s6vn6k41gac4a4idbjkrn.apps.googleusercontent.com";
+      const API_KEY = "AIzaSyDyXKIvKG94DNfUX9JRPJJ9U6RG0EwIEsI";
+
+      // Discovery doc URL for APIs used by the quickstart
+      const DISCOVERY_DOC = "https://sheets.googleapis.com/$discovery/rest?version=v4";
+
+      // Authorization scopes required by the API; multiple scopes can be
+      // included, separated by spaces.
+      const SCOPES = "https://www.googleapis.com/auth/spreadsheets.readonly";
+
+      let tokenClient;
+
+      /**
+       * Callback after api.js is loaded.
+       */
+      function gapiOnLoadHandler() {
+        gapi.load("client", async function() {
+          await gapi.client.init({
+            apiKey: API_KEY,
+            discoveryDocs: [DISCOVERY_DOC],
+          });
+        });
+      }
+
+      /**
+       * Callback after Google Identity Services are loaded.
+       */
+      function gisOnLoadHandler() {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: SCOPES,
+          callback: "", // defined later
+        });
+      }
+
+      search_btn_dom.addEventListener("click", async function() {
+        if (!gapi.client) return
+        console.log(gapi.client.getToken())
+          await listMajors();
+        // tokenClient.callback = async (resp) => {
+        //   if (resp.error !== undefined) {
+        //     throw (resp);
+        //   }
+        //   await listMajors();
+        // };
+        // if (gapi.client.getToken() === null) {
+        //   // Prompt the user to select a Google Account and ask for consent to share their data
+        //   // when establishing a new session.
+        //   tokenClient.requestAccessToken({prompt: "consent"});
+        // } else {
+          
+        //   // Skip display of account chooser and consent dialog for an existing session.
+        //   tokenClient.requestAccessToken({prompt: ""});
+        // }
+      });
+
+      /**
+       *  Sign out the user upon button click.
+       */
+      function handleSignoutClick() {
+        const token = gapi.client.getToken();
+        if (token !== null) {
+          google.accounts.oauth2.revoke(token.access_token);
+          gapi.client.setToken("");
+          document.getElementById('content').innerText = '';
+          document.getElementById('authorize_button').innerText = 'Authorize';
+          document.getElementById('signout_button').style.visibility = 'hidden';
+        }
+      }
+
+      /**
+       * Print the names and majors of students in a sample spreadsheet:
+       * https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
+       */
+      async function listMajors() {
+        let response;
+        try {
+          // Fetch first 10 files
+          response = await gapi.client.sheets.spreadsheets.values.get({
+            spreadsheetId: '1Lsk2p7Jz0Ul2nC2Y4gxID0TZXlIJPO0zi0HwbjfiDKo',
+            range: 'PublicStorage!A1:J',
+          });
+        } catch (err) {
+            list_itself_dom.innerText = err.message;
+          return;
+        }
+        const range = response.result;
+        if (!range || !range.values || range.values.length == 0) {
+            list_itself_dom.innerText = 'No values found.';
+          return;
+        }
+        // Flatten to string to display
+        const output = range.values;
+        console.log(range)
+        list_itself_dom.innerHTML = "";
+        for (let i in range.values) {
+          let row = range.values[i];
+          list_itself_dom.innerHTML += "<p>" + row + "</p>";
+        }
+        
+      }
