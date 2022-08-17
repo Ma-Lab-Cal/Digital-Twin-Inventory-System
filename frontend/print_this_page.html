@@ -1,48 +1,110 @@
 <html>
 <head>
   <style>
-  .card {
-    width: 2in;
-    height: 1in;
-    border: 1px dotted #666;
-    display: flex;
-  }
-  .card .text {
-    margin-left: 1rem;
-  }
-  @media print {
-    @page {
-      size: 2in 1in;
+    body {
       margin: 0;
+      font-family: Microsoft YaHei UI;
     }
-    .card {
-      border: 0;
+    .printarea {
+      margin-left: 1mm;
+      margin-right: 1mm;
+      width: 52mm;
+      height: 90mm;
+      border-left: 1px dotted #666;
+      border-right: 1px dotted #666;
+      display: flex;
+      flex-direction: column;
+      padding: 0.5rem;
+      align-items: center;
     }
-  }
+    .barcode {
+      width: 24rem;
+      height: 3rem;
+    }
+    #qrcode > img {
+      margin-top: 1rem;
+      width: 128px;
+      height: 128px;
+    }
+
+    .text {
+      margin-top: 1rem;
+    }
+
+    /* .datamatrix {
+      width: 5rem;
+      height: 5rem;
+    } */
+    @media print {
+      @page {
+        size: 59mm 104mm;
+        margin: 0;
+      }
+      .card {
+        border: 0;
+      }
+    }
   </style>
   <script src="datamatrix.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js" integrity="sha512-QEAheCz+x/VkKtxeGoDq6nsGyzTx/0LMINTgQjqZ0h3+NjP+bCsPYz3hn0HnBkGmkIFSr7QcEZT+KyEM7lbLPQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
-  <div class="card">
-    <div class="barcode" id="barcode"></div>
-    <div class="text">hello</div>
+  <!-- <img src="test.png" style="position: absolute; left: 0; top: 0; opacity: 0.2; width: 54mm; height: 106mm"> -->
+  <div class="printarea" id="printarea">
   </div>
 
+  <div class="controlpanel" id="controlpanel">
+    <input type="text" id="input_url" value="https://www.notion.so/Test-db2e35e62759496aa208a81f340c1431">
+    <input type="text" id="input_text" value="EECS Box S0001">
+    <button id="printit">PrintIt</button>
+
+  </div>
   <script>
-  var datamatrix_code = DATAMatrix({
-    msg: "Your message here",
-    dim: 64,
-    rct: 0,
-    pad: 1,
-    pal: ["#000000", "#FFFFFF"],
-    vrb: 0,
-  });
-  barcode.appendChild(datamatrix_code);
-  
+    
   
   window.onload = function () {
-    window.print();  
+    
+    generateContent();
+    
   }
+  
+  
+  var generateContent = function() {
+    printarea.innerHTML = `
+    <div class="datamatrix" id="datamatrix_DOM"></div>
+    <div class="qrcode" id="qrcode"></div>
+    <div class="text" id="text_DOM">text here</div>
+`;
+    let url = input_url.value;
+    let text = input_text.value;
+
+    
+    text_DOM.innerHTML = text;
+
+    new QRCode(document.getElementById("qrcode"), url);
+
+    var datamatrix_code = DATAMatrix({
+      msg: url,
+      dim: 128,
+      rct: 0,
+      pad: 1,
+      pal: ["#000000", "#FFFFFF"],
+      vrb: 0,
+    });
+    datamatrix_DOM.appendChild(datamatrix_code);
+    
+    controlpanel.style.display="none";
+    
+    setTimeout(function() {
+      window.print();
+      controlpanel.style.display="block";
+    }, 1);
+  };
+
+
+  printit.addEventListener("click", generateContent);
+  
   </script>
 </body>
 </html>
