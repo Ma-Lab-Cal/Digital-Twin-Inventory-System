@@ -1,26 +1,31 @@
-// Global (F)
-let currObj = "";
+// Global
+let currObj = "0";
 let currCat = "";
 let objInfo = "Equipment Info";
+var canvasW = 850;
+var canvasH = 1000;
 // Global
 
 
 
-// Initialization (F)
+// Initialization
 document.getElementById("editInfo").style.display = "none";
 document.getElementById("addInfo").style.display = "none";
 document.getElementById("plotFunc").style.display = "none";
 let now = new Date();
 document.getElementById("End").value = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);//time_to_text(new Date().getTime() / 1000, true);
 document.getElementById('nameinfo').value = "No object selected!";
+
+document.getElementById("locationlist").style.display = "none";
+
 // Initialization
 
 
 
-// Markdown (F)
+// Markdown
 const markdownReader = (text) => {
     const toHTML = text
-        .replaceAll(/\[([^\]]+)\]\(([^\)]+)\)/gim, '<a class="md" href="$2">$1</a>') // hyperlink
+        .replaceAll(/\[([^\]]+)\]\(([^\)]+)\)/gim, '<a class="md" target="_blank" href="$2">$1</a>') // hyperlink
         .replaceAll(/^### (.*$)/gim, '<h3>$1</h3>') // h3 tag
         .replaceAll(/^## (.*$)/gim, '<h2>$1</h2>') // h2 tag
         .replaceAll(/^# (.*$)/gim, '<h1>$1</h1>') // h1 tag
@@ -32,7 +37,7 @@ const markdownReader = (text) => {
 
 
 
-// Time (F)
+// Time
 function time_to_text(timestamp, read = false) {
     var time = new Date(timestamp * 1000);
     var months = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -65,39 +70,209 @@ function text_to_time(text) {
 
 
 // Inventory
-var raw_entries = [];
-let objMap = new Map([]);
-var inventory_list = [];
-var inventory_fetchAll = function() {
-    var socket = new WebSocket("ws://localhost:8080");
-    socket.addEventListener("open", function(e) {
-        var request = {
-            "method": "GET",
-            "params": {
-                "key": "/inventory_item/%"
-            }
+	/* exported gapiLoaded */
+    /* exported gisLoaded */
+    /* exported handleAuthClick */
+    /* exported handleSignoutClick */
+
+      // TODO(developer): Set to client ID and API key from the Developer Console
+      const CLIENT_ID = "968225988580-1r4j1b3ooh2s6vn6k41gac4a4idbjkrn.apps.googleusercontent.com";
+      const API_KEY = "AIzaSyDyXKIvKG94DNfUX9JRPJJ9U6RG0EwIEsI";
+
+      // Discovery doc URL for APIs used by the quickstart
+      const DISCOVERY_DOC = "https://sheets.googleapis.com/$discovery/rest?version=v4";
+
+      // Authorization scopes required by the API; multiple scopes can be
+      // included, separated by spaces.
+      const SCOPES = "https://www.googleapis.com/auth/spreadsheets.readonly";
+
+      let tokenClient;
+
+      /**
+       * Callback after api.js is loaded.
+       */
+      function gapiOnLoadHandler() {
+        gapi.load("client", async function() {
+          await gapi.client.init({
+            apiKey: API_KEY,
+            discoveryDocs: [DISCOVERY_DOC],
+          });
+        });
+      }
+
+      /**
+       * Callback after Google Identity Services are loaded.
+       */
+      function gisOnLoadHandler() {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: SCOPES,
+          callback: "", // defined later
+        });
+      }
+
+      search_btn_dom.addEventListener("click", async function() {
+        if (!gapi.client) return
+        // console.log(gapi.client.getToken())
+          await listMajors();
+        // tokenClient.callback = async (resp) => {
+        //   if (resp.error !== undefined) {
+        //     throw (resp);
+        //   }
+        //   await listMajors();
+        // };
+        // if (gapi.client.getToken() === null) {
+        //   // Prompt the user to select a Google Account and ask for consent to share their data
+        //   // when establishing a new session.
+        //   tokenClient.requestAccessToken({prompt: "consent"});
+        // } else {
+          
+        //   // Skip display of account chooser and consent dialog for an existing session.
+        //   tokenClient.requestAccessToken({prompt: ""});
+        // }
+      });
+
+      /**
+       *  Sign out the user upon button click.
+       */
+      function handleSignoutClick() {
+        const token = gapi.client.getToken();
+        if (token !== null) {
+          google.accounts.oauth2.revoke(token.access_token);
+          gapi.client.setToken("");
+          document.getElementById('content').innerText = '';
+          document.getElementById('authorize_button').innerText = 'Authorize';
+          document.getElementById('signout_button').style.visibility = 'hidden';
         }
-        socket.send(JSON.stringify(request) + "\n");
-    });
-    socket.addEventListener("message", function(e) {
-        let data = JSON.parse(e.data);
-        inventory_list = [];
-        for (let i=0; i<data.length; i+=1) { 
-            inventory_list.push(JSON.parse(data[i][1]));
+      }
+
+	  var output = [];
+	  var values = [];
+	  var outmap = new Map([]);
+
+      /**
+       * Print the names and majors of students in a sample spreadsheet:
+       * https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
+       */
+      async function listMajors() {
+        let response;
+        try {
+          // Fetch first 10 files
+          response = await gapi.client.sheets.spreadsheets.values.get({
+            spreadsheetId: '1Lsk2p7Jz0Ul2nC2Y4gxID0TZXlIJPO0zi0HwbjfiDKo',
+            range: 'PublicStorage!A1:J',
+          });
+        } catch (err) {
+            list_itself_dom.innerText = err.message;
+          return;
         }
-    });
-};
-inventory_fetchAll();
-function useData() {
-    for (let i = 0; i < inventory_list.length; i += 1) {
-        raw_entries.push(inventory_list[i].name);
+        const range = response.result;
+        if (!range || !range.values || range.values.length == 0) {
+            list_itself_dom.innerText = 'No values found.';
+          return;
+        }
+        // Flatten to string to display
+        output = range.values;
+        // console.log(range)
+        list_itself_dom.innerHTML = "";
+        values = output[0];
+        for (let i in output) {
+            if (i != 0) {
+                let row = output[i];
+				outmap.set(row[values.indexOf('SKU')], row);
+				entries.set(row[values.indexOf('SKU')], row[values.indexOf('Name')].toLowerCase());
+          		list_itself_dom.innerHTML += "<div class=\"search-result\" id=\"" + row[values.indexOf('SKU')] + "\"><a href=\"javascript: void();\" onclick=\"return objSelect(\'" + row[values.indexOf('SKU')] + "\')\">" + row[values.indexOf('Name')] + "</a></div>";
+        	} 
+        }
     }
-    for (let i = 0; i < raw_entries.length; i += 1) {
-        objMap.set(raw_entries[i], inventory_list[i]);
+
+	function objSelect(name) {
+		clearPoint();
+		if (currObj != "") {
+			document.getElementById(currObj).classList.add("search-result");
+			document.getElementById(currObj).classList.remove("search-selected");
+		}
+		currObj = name;
+		let curr = outmap.get(currObj);
+		addPoint(curr);
+		document.getElementById("ttl").innerText = curr[values.indexOf('Name')];
+		document.getElementById("sku").innerHTML = curr[values.indexOf('SKU')];
+		document.getElementById("uri").innerHTML = curr[values.indexOf('Location')];
+		document.getElementById("qty").innerHTML = curr[values.indexOf('Quantity')];
+		document.getElementById("tag").innerHTML = curr[values.indexOf('Type')];
+		document.getElementById("des").innerHTML = markdownReader(curr[values.indexOf('Description')]);
+
+		document.getElementById('nameinfo').value = curr[values.indexOf('Name')];
+		document.getElementById("skuInfo").innerHTML = curr[values.indexOf('SKU')];
+		document.getElementById("uriInfo").value = curr[values.indexOf('Location')];
+		document.getElementById("qtyInfo").value = curr[values.indexOf('Quantity')];
+		document.getElementById("tagInfo").value = curr[values.indexOf('Type')];
+		document.getElementById("desInfo").value = curr[values.indexOf('Description')];
+
+		document.getElementById(currObj).classList.add("search-selected");
+		document.getElementById(currObj).classList.remove("search-result");    
+	}
+// Inventory
+
+
+
+// Search Engine
+var word_mapping = [["Ø", "phi"], ["µm", "um"], ["°", "deg"]];
+var entries = new Map([]);
+
+var onSearchHandler = function(e) {
+    clearPoint();
+
+    words = searchbar.value.toLowerCase();
+
+    if (!words) {
+        list_itself_dom.innerHTML = "";
+		for (const [SKU, obj] of outmap) {
+			list_itself_dom.innerHTML += "<div class=\"search-result\" id=\"" + SKU + "\"><a href=\"javascript: void();\" onclick=\"return objSelect(\'" + SKU + "\')\">" + obj[values.indexOf('Name')] + "</a></div>";
+		}
+		return;
+    }
+
+  tokens = words.split(" ");
+  autofill_results = [];
+  autofill_list = [];
+
+  for (let i = 0; i < tokens.length; i += 1) {
+    if (!tokens[i]) continue;
+
+    for (const [SKU, obj] of entries) {
+      let pos = obj.indexOf(tokens[i]);
+      if (pos != -1) {
+        let display_text = outmap.get(SKU)[values.indexOf('Name')].substring(0, pos) + "<span class=\"highlight\">" + outmap.get(SKU)[values.indexOf('Name')].substring(pos, pos + tokens[i].length) + "</span>" + outmap.get(SKU)[values.indexOf('Name')].substring(pos + tokens[i].length);
+        autofill_list.push(SKU)
+        autofill_results.push(display_text);
+      }
+    }
+
+    // for (let n = 0; n < entries.length; n += 1) {
+    //     if (!autofill_list.includes(raw_entries[n])) {
+    //         let eTags = objMap.get(raw_entries[n]).tag.toLowerCase();
+    //         if (eTags.includes(tokens[i] + ";")) {
+    //             let display_text = raw_entries[n] + " " + "<span class=\"highlight\">(" + tokens[i] + ")</span>";
+    //             autofill_list.push(raw_entries[n])
+    //             autofill_results.push(display_text);
+    //         }
+    //     }
+    // }
+  }
+
+  	list_itself_dom.innerHTML = "";
+    for (let i = 0; i < autofill_results.length; i += 1) {
+        list_itself_dom.innerHTML += "<div class=\"search-result\" id=\"" + autofill_list[i] + "\"><a href=\"javascript: void();\" onclick=\"return objSelect('" + autofill_list[i] + "')\">" + autofill_results[i] + "</a></div>";
+    }
+    if (autofill_results.length <= 5) {
+        // changeImage('/static/img/Plan 00.png');
+        for (let i = 0; i < autofill_list.length; i += 1) {
+			addPoint(outmap.get(autofill_list[i]));
+        }
     }
 }
-setTimeout(useData, 2500);
-// Inventory
+// Search Engine
 
 
 
@@ -105,7 +280,6 @@ setTimeout(useData, 2500);
 function dropList(name, a) {
     currCat = name;
     dropDown(a);
-    // console.log(currCat);
 }
 
 function dropDown(a) {
@@ -118,45 +292,13 @@ function dropDown(a) {
     }
     return false;
 }
-
-function objSelect(name) {
-    removePoint();
-    if (currObj != "") {
-        document.getElementById(currObj).classList.add("search-result");
-        document.getElementById(currObj).classList.remove("search-selected");
-    }
-
-    let location = objMap.get(name).uri;
-    objInfo = location;
-    currObj = name;
-    if (location != "" && pointMap.get(location) != null) {
-        addPoint(pointMap.get(location).x, pointMap.get(location).y); // update with canvas
-    }
-    document.querySelector('.title').innerText = currObj;
-    document.getElementById("sku").innerHTML = objMap.get(currObj).sku;
-    document.getElementById("uri").innerHTML = objMap.get(currObj).uri;
-    document.getElementById("qty").innerHTML = objMap.get(currObj).qty;
-    document.getElementById("tag").innerHTML = objMap.get(currObj).tag;
-    document.getElementById("des").innerHTML = markdownReader(objMap.get(currObj).description);
-
-    document.getElementById('nameinfo').value = currObj;
-    document.getElementById("skuInfo").innerHTML = objMap.get(currObj).sku;
-    document.getElementById("uriInfo").value = objMap.get(currObj).uri;
-    document.getElementById("qtyInfo").value = objMap.get(currObj).qty;
-    document.getElementById("tagInfo").value = objMap.get(currObj).tag;
-    document.getElementById("desInfo").value = objMap.get(currObj).description;
-
-    document.getElementById(currObj).classList.add("search-selected");
-    document.getElementById(currObj).classList.remove("search-result");    
-}
 // Dropdown List
 
 
 
 // Change Image
-// needs improvement with regex
 function changeImage(img) {
-    removePoint(); // update with canvas
+    clearPoint();
     document.querySelector('.map').src = img;
 }
 // Change Image
@@ -164,59 +306,33 @@ function changeImage(img) {
 
 
 // Add/Remove/Edit Points
-// update with canvas
 const pointMap = new Map([
-  ["Test0", {x:250, y:250}],
-  ["Test2", {x:250, y:500}],
-  ["Test5", {x:500, y:500}],
-  ["Test8", {x:500, y:250}],
-  [" ", {x:1000, y:1000}],
-  ["Daniel", {x:1500, y:1500}]
-]); // manually set the point locations, become ratios once canvas is used
+  ["Location 0", {x:0.25, y:0.25}],
+  ["Location 1", {x:0.25, y:0.5}],
+  ["Location 2", {x:0.5, y:0.5}],
+  ["Location 3", {x:0.5, y:0.25}]
+]);
+// manually set the point locations, become ratios once canvas is used
 
-let pointStatus = false;
-let childStatus = false;
-let hasCircle = false
-function pointStatusChange() {
-    childStatus = false;
-    pointStatus = !pointStatus;
+function addPoint(obj) {
+	let loc = obj[values.indexOf('Location')];
+	let x = pointMap.get(loc).x * canvasW;
+	let y = pointMap.get(loc).y * canvasH;
+	var c = document.getElementById("myCanvas");
+	var ctx = c.getContext("2d");
+	ctx.fillStyle = 'red';
+	ctx.beginPath();
+	ctx.arc(x, y, 10, 0, 2 * Math.PI);
+	ctx.fill();
+	ctx.fillStyle = 'blue';
+	ctx.font = "20px Arial";
+	ctx.fillText(loc, x + 15, y + 7.5);
 }
 
-document.onclick = function(e) {
-    if (pointStatus && childStatus) {
-        clearStyle();
-        addPoint(e.pageX - 10, e.pageY - 10); // do something to record the latest point addition location
-        pointStatus = false;
-        childStatus = false;
-    }
-    childStatus = true;
-}
-
-function addPoint(x, y) {
-    changeImage('/static/img/Plan 00.png');
-    // changeImage('img/Plan 00.png');
-    var button = document.createElement('div');
-    button.style.position = 'absolute';
-    button.style.left = x + 'px';
-    button.style.top = y + 'px';
-    button.innerHTML = '<div class="circle"></br>' + objInfo + '</div>';
-    removePoint();
-    document.body.appendChild(button);
-    hasCircle = true
-}
-
-function freeAdd(name, num) {
-    var button = document.createElement('div');
-    button.style.position = 'absolute';
-    button.style.left = pointMap.get(objMap.get(name).uri).x + 'px';
-    button.style.top = pointMap.get(objMap.get(name).uri).y + 'px';
-    button.innerHTML = '<div class="circle">' + num + '</br>' + objMap.get(name).uri + '</div>'; // replace with y-axis info
-    document.body.appendChild(button);
-    hasCircle = true
-}
-
-function removePoint() {
-    document.querySelectorAll('.circle').forEach(e => e.remove());
+function clearPoint(){
+	var c = document.getElementById("myCanvas");
+	var ctx = c.getContext("2d");
+	ctx.clearRect(0, 0, canvasW, canvasH)
 }
 // Add/Remove/Edit Points
 
@@ -224,9 +340,10 @@ function removePoint() {
 
 // Add and Edit Buttons
 const add = document.querySelector('.add');
-const edit = document.querySelector('.edit');
-
 let addMode = false;
+const edit = document.querySelector('.edit');
+let editMode = false;
+
 function addEqp() {
     addMode = !addMode;
     if (addMode) {
@@ -242,7 +359,6 @@ function addEqp() {
     }
 }
 
-let editMode = false;
 function editEqp() {
     editMode = !editMode;
     if (!editMode) {
@@ -256,12 +372,13 @@ function editEqp() {
         document.getElementById("eqpInfo").style.display = "none";
         document.getElementById("editInfo").style.display = "block";
         if (currObj != "") {
-            document.getElementById('nameinfo').value = currObj;
-            document.getElementById("skuInfo").innerHTML = objMap.get(currObj).sku;
-            document.getElementById("uriInfo").value = objMap.get(currObj).uri;
-            document.getElementById("qtyInfo").value = objMap.get(currObj).qty;
-            document.getElementById("tagInfo").value = objMap.get(currObj).tag;
-            document.getElementById("desInfo").value = objMap.get(currObj).description;
+			let curr = outmap.get(currObj);
+			document.getElementById('nameinfo').value = curr[values.indexOf('Name')];
+			document.getElementById("skuInfo").innerHTML = curr[values.indexOf('SKU')];
+			document.getElementById("uriInfo").value = curr[values.indexOf('Location')];
+			document.getElementById("qtyInfo").value = curr[values.indexOf('Quantity')];
+			document.getElementById("tagInfo").value = curr[values.indexOf('Type')];
+			document.getElementById("desInfo").value = curr[values.indexOf('Description')];
         } else{
             document.querySelector('.objTitle').innerText = "No object selected!";
             document.getElementById("skuInfo").innerHTML = "";
@@ -324,56 +441,55 @@ function getEditData() {
     }
 }
 
-function inventory_addItem() {
-    var socket = new WebSocket("ws://localhost:8080");
-    socket.addEventListener("open", function(e) {
-        var request = {
-            "method": "SET",
-            "params": {
-                "key": "/inventory_item/" + addsku,
-                "value": {
-                        "sku": addsku,
-                        "uri": adduri,
-                        "name": addname,
-                        "qty": addqty,
-                        "description": adddes,
-                        "tag": addtag,
-                        "img": ""
-                }
-            }
-        }
-        socket.send(JSON.stringify(request)+"\n");
-    });
+// function inventory_addItem() {
+//     var socket = new WebSocket("ws://localhost:8080");
+//     socket.addEventListener("open", function(e) {
+//         var request = {
+//             "method": "SET",
+//             "params": {
+//                 "key": "/inventory_item/" + addsku,
+//                 "value": {
+//                         "sku": addsku,
+//                         "uri": adduri,
+//                         "name": addname,
+//                         "qty": addqty,
+//                         "description": adddes,
+//                         "tag": addtag,
+//                         "img": ""
+//                 }
+//             }
+//         }
+//         socket.send(JSON.stringify(request)+"\n");
+//     });
 
-    socket.addEventListener("message", function(e) {
-        // console.log(e.data);
-    });
-};
+//     socket.addEventListener("message", function(e) {
+//     });
+// };
 
 function addEvent() {
     if (addMode) {
         getAddData();
         if (!stopit) {
-            inventory_addItem();
-            raw_entries = [];
-            objMap = new Map([]);
-            inventory_list = [];
-            inventory_fetchAll();
-            setTimeout(useData, 2500);
-            autofill.innerHTML = "";
-            setTimeout(window.onload = function() {
-                searchbar.addEventListener("keyup", onSearchHandler);
+            // inventory_addItem();
+            // raw_entries = [];
+            // objMap = new Map([]);
+            // inventory_list = [];
+            // inventory_fetchAll();
+            // setTimeout(useData, 2500);
+            // autofill.innerHTML = "";
+            // setTimeout(window.onload = function() {
+            //     searchbar.addEventListener("keyup", onSearchHandler);
             
-                for (let n = 0; n < raw_entries.length; n += 1) {
-                entries[n] = raw_entries[n];
-                for (let i = 0; i < word_mapping.length; i += 1) {
-                    entries[n] = entries[n].replace(word_mapping[i][0], word_mapping[i][1]);
-                }
-                entries[n] = entries[n].toLowerCase()
-                }
+            //     for (let n = 0; n < raw_entries.length; n += 1) {
+            //     entries[n] = raw_entries[n];
+            //     for (let i = 0; i < word_mapping.length; i += 1) {
+            //         entries[n] = entries[n].replace(word_mapping[i][0], word_mapping[i][1]);
+            //     }
+            //     entries[n] = entries[n].toLowerCase()
+            //     }
                 
-                onSearchHandler();
-            }, 2500);
+            //     onSearchHandler();
+            // }, 2500);
             document.getElementById("addname").value = "";
             document.getElementById("addsku").value = "";
             document.getElementById("adduri").value = "";
@@ -392,30 +508,30 @@ function editEvent() {
     if (editMode) {
         getEditData();
         if (!stopit) {
-        inventory_addItem();
-        raw_entries = [];
-        objMap = new Map([]);
-        inventory_list = [];
-        inventory_fetchAll();
-        setTimeout(useData, 2500);
-        autofill.innerHTML = "";
-        setTimeout(window.onload = function() {
-            searchbar.addEventListener("keyup", onSearchHandler);
+        // inventory_addItem();
+        // raw_entries = [];
+        // objMap = new Map([]);
+        // inventory_list = [];
+        // inventory_fetchAll();
+        // setTimeout(useData, 2500);
+        // autofill.innerHTML = "";
+        // setTimeout(window.onload = function() {
+        //     searchbar.addEventListener("keyup", onSearchHandler);
         
-            for (let n = 0; n < raw_entries.length; n += 1) {
-            entries[n] = raw_entries[n];
-            for (let i = 0; i < word_mapping.length; i += 1) {
-                entries[n] = entries[n].replace(word_mapping[i][0], word_mapping[i][1]);
-            }
-            entries[n] = entries[n].toLowerCase()
-            }
+        //     for (let n = 0; n < raw_entries.length; n += 1) {
+        //     entries[n] = raw_entries[n];
+        //     for (let i = 0; i < word_mapping.length; i += 1) {
+        //         entries[n] = entries[n].replace(word_mapping[i][0], word_mapping[i][1]);
+        //     }
+        //     entries[n] = entries[n].toLowerCase()
+        //     }
             
-            onSearchHandler();
-        }, 2500);
+        //     onSearchHandler();
+        // }, 2500);
         editEqp();
         edit.classList.remove("clkdedit");
         edit.classList.add("edit");
-        document.querySelector('.title').innerText = "No object selected!";
+        document.getElementById("ttl").innerText = "No object selected!";
             document.getElementById("sku").innerHTML = "";
             document.getElementById("uri").innerHTML = "";
             document.getElementById("qty").innerHTML = "";
@@ -429,7 +545,7 @@ function editEvent() {
 
 
 
-// History (F)
+// History
 const history = document.querySelector('.history');
 let historyMode = false;
 function stopPlot() {
@@ -465,108 +581,38 @@ locli.innerHTML += "<div class=\"locations\">" + "Student 2" + "(2)" + "</div>";
 
 
 
-// Search Engine
-var word_mapping = [["Ø", "phi"], ["µm", "um"], ["°", "deg"]];
-var entries = [];
-
-var onSearchHandler = function(e) {
-    removePoint();
-
-    words = searchbar.value.toLowerCase();
-
-    if (!words) {
-        autofill.innerHTML = "";
-        for (let n = 0; n < entries.length; n += 1) {
-            let quoteless = raw_entries[n].replaceAll(/\'/gim, '\\\'');
-            autofill.innerHTML += "<div class=\"search-result\" id=\"" + raw_entries[n] + "\"><a href=\"javascript: void();\" onclick=\"return objSelect(\'" + quoteless + "\')\">" + raw_entries[n] + "</a></div>";
-        }
-        return;
-    }
-
-  tokens = words.split(" ");
-  autofill_results = [];
-  autofill_list = [];
-
-  for (let i = 0; i < tokens.length; i += 1) {
-    if (!tokens[i]) continue;
-
-    for (let n = 0; n < entries.length; n += 1) {
-      let pos = entries[n].indexOf(tokens[i]);
-      if (pos != -1) {
-        let display_text = raw_entries[n].substring(0, pos) + "<span class=\"highlight\">" + raw_entries[n].substring(pos, pos + tokens[i].length) + "</span>" + raw_entries[n].substring(pos + tokens[i].length);
-        autofill_list.push(raw_entries[n])
-        autofill_results.push(display_text);
-      }
-    }
-
-    for (let n = 0; n < entries.length; n += 1) {
-        if (!autofill_list.includes(raw_entries[n])) {
-            let eTags = objMap.get(raw_entries[n]).tag.toLowerCase();
-            if (eTags.includes(tokens[i] + ";")) {
-                let display_text = raw_entries[n] + " " + "<span class=\"highlight\">(" + tokens[i] + ")</span>";
-                autofill_list.push(raw_entries[n])
-                autofill_results.push(display_text);
-            }
-        }
-    }
-  }
-
-    autofill.innerHTML = "";
-    for (let i = 0; i < autofill_results.length; i += 1) {
-        let quoteless = autofill_list[i].replaceAll(/\'/gim, '\\\'');
-        autofill.innerHTML += "<div class=\"search-result\" id=\"" + autofill_list[i] + "\"><a href=\"javascript: void();\" onclick=\"return objSelect('" + quoteless + "')\">" + autofill_results[i] + "</a></div>";
-    }
-    if (autofill_results.length <= 5) {
-        changeImage('/static/img/Plan 00.png');
-        for (let i = 0; i < autofill_results.length; i += 1) {
-            freeAdd(autofill_list[i], i + 1);
-        }
-    }
-}
-
-setTimeout(window.onload = function() {
-    searchbar.addEventListener("keyup", onSearchHandler);
-  
-    for (let n = 0; n < raw_entries.length; n += 1) {
-      entries[n] = raw_entries[n];
-      for (let i = 0; i < word_mapping.length; i += 1) {
-        entries[n] = entries[n].replace(word_mapping[i][0], word_mapping[i][1]);
-      }
-      entries[n] = entries[n].toLowerCase()
-    }
-    
-    onSearchHandler();
-  }, 2500);
-// Search Engine
-
-
-
 // Data Fetch
 var g_plot_data = [
-  {x: [], y: [], xaxis: "x1", yaxis: "y1", legendgroup: "1", name: "Room 0", mode: "lines", type: "scatter", showlegend: false},
-  {x: [], y: [], xaxis: "x1", yaxis: "y1", legendgroup: "2", name: "Room 1", mode: "lines", type: "scatter", showlegend: false},
-  {x: [], y: [], xaxis: "x1", yaxis: "y1", legendgroup: "3", name: "Room 2", mode: "lines", type: "scatter", showlegend: false},
+  {x: [], y: [], xaxis: "x1", yaxis: "y1", legendgroup: "1", name: "Room 0", mode: "lines", type: "scatter"},
+  {x: [], y: [], xaxis: "x1", yaxis: "y1", legendgroup: "2", name: "Room 1", mode: "lines", type: "scatter"},
+  {x: [], y: [], xaxis: "x1", yaxis: "y1", legendgroup: "3", name: "Room 2", mode: "lines", type: "scatter"},
+  {x: [], y: [], xaxis: "x1", yaxis: "y1", legendgroup: "4", name: "Room 3", mode: "lines", type: "scatter"},
   {x: [], y: [], xaxis: "x2", yaxis: "y2", legendgroup: "1", name: "Room 0", mode: "lines", type: "scatter", showlegend: false},
   {x: [], y: [], xaxis: "x2", yaxis: "y2", legendgroup: "2", name: "Room 1", mode: "lines", type: "scatter", showlegend: false},
   {x: [], y: [], xaxis: "x2", yaxis: "y2", legendgroup: "3", name: "Room 2", mode: "lines", type: "scatter", showlegend: false},
-  {x: [], y: [], xaxis: "x3", yaxis: "y3", legendgroup: "1", name: "Room 0", mode: "lines", type: "scatter"},
-  {x: [], y: [], xaxis: "x3", yaxis: "y3", legendgroup: "2", name: "Room 1", mode: "lines", type: "scatter"},
-  {x: [], y: [], xaxis: "x3", yaxis: "y3", legendgroup: "3", name: "Room 2", mode: "lines", type: "scatter"},
+  {x: [], y: [], xaxis: "x2", yaxis: "y2", legendgroup: "4", name: "Room 3", mode: "lines", type: "scatter", showlegend: false},
+  {x: [], y: [], xaxis: "x3", yaxis: "y3", legendgroup: "1", name: "Room 0", mode: "lines", type: "scatter", showlegend: false},
+  {x: [], y: [], xaxis: "x3", yaxis: "y3", legendgroup: "2", name: "Room 1", mode: "lines", type: "scatter", showlegend: false},
+  {x: [], y: [], xaxis: "x3", yaxis: "y3", legendgroup: "3", name: "Room 2", mode: "lines", type: "scatter", showlegend: false},
+  {x: [], y: [], xaxis: "x3", yaxis: "y3", legendgroup: "4", name: "Room 3", mode: "lines", type: "scatter", showlegend: false},
   {x: [], y: [], xaxis: "x4", yaxis: "y4", legendgroup: "1", name: "Room 0", mode: "lines", type: "scatter", showlegend: false},
   {x: [], y: [], xaxis: "x4", yaxis: "y4", legendgroup: "2", name: "Room 1", mode: "lines", type: "scatter", showlegend: false},
   {x: [], y: [], xaxis: "x4", yaxis: "y4", legendgroup: "3", name: "Room 2", mode: "lines", type: "scatter", showlegend: false},
+  {x: [], y: [], xaxis: "x4", yaxis: "y4", legendgroup: "4", name: "Room 3", mode: "lines", type: "scatter", showlegend: false},
   {x: [], y: [], xaxis: "x5", yaxis: "y5", legendgroup: "1", name: "Room 0", mode: "lines", type: "scatter", showlegend: false},
   {x: [], y: [], xaxis: "x5", yaxis: "y5", legendgroup: "2", name: "Room 1", mode: "lines", type: "scatter", showlegend: false},
   {x: [], y: [], xaxis: "x5", yaxis: "y5", legendgroup: "3", name: "Room 2", mode: "lines", type: "scatter", showlegend: false},
+  {x: [], y: [], xaxis: "x5", yaxis: "y5", legendgroup: "4", name: "Room 3", mode: "lines", type: "scatter", showlegend: false},
   {x: [], y: [], xaxis: "x6", yaxis: "y6", legendgroup: "1", name: "Room 0", mode: "lines", type: "scatter", showlegend: false},
   {x: [], y: [], xaxis: "x6", yaxis: "y6", legendgroup: "2", name: "Room 1", mode: "lines", type: "scatter", showlegend: false},
-  {x: [], y: [], xaxis: "x6", yaxis: "y6", legendgroup: "3", name: "Room 2", mode: "lines", type: "scatter", showlegend: false}
+  {x: [], y: [], xaxis: "x6", yaxis: "y6", legendgroup: "3", name: "Room 2", mode: "lines", type: "scatter", showlegend: false},
+  {x: [], y: [], xaxis: "x6", yaxis: "y6", legendgroup: "4", name: "Room 3", mode: "lines", type: "scatter", showlegend: false}
   ];
 
 var range = 60 * 60; // default to be 1 hour
 var end = new Date().getTime();
 
-const keys = ["timestamp", "node", "temperature", "humidity", "pm1_0", "pm2_5", "pm10", "magnetic_x", "magnetic_y", "magnetic_z", "lux"];
+const keys = ["timestamp", "node", "temperature", "humidity", "num_particles_0_3_um", "num_particles_1_um", "num_particles_10_um", "magnetic_x", "magnetic_y", "magnetic_z", "lux"];
 
 var fetchEnvData = function() {
   var socket = new WebSocket("ws://localhost:8000");
@@ -575,6 +621,7 @@ var fetchEnvData = function() {
 
   if (historyMode) {
     end = Date.parse(document.getElementById('End').value); //2022-07-26T23:19 1658902740000
+    // console.log(end);
     // console.log(new Date().toISOString().slice(0, 16));
   }
 
@@ -601,7 +648,6 @@ var fetchEnvData = function() {
     chart_loading_blocker.style["display"] = "none";
   });
 };
-
 // Data Fetch
 
 
@@ -609,17 +655,17 @@ var fetchEnvData = function() {
 // Data Plot
 var layout = {
     legend: {"orientation": "v", x: 1, y: 0.98, yanchor: 'top', xanchor: 'right', font: {family: 'Arial, Helvrtica, sans-serif', size: 10, color: '#000000'}, bgcolor: 'rgba(0, 0, 0, 0)'},
-    colorway: ['darkorange', 'seagreen', 'royalblue', 'darkorange', 'seagreen', 'royalblue', 'darkorange', 'seagreen', 'royalblue'],
+    colorway: ['darkorange', 'seagreen', 'royalblue', 'purple', 'darkorange', 'seagreen', 'royalblue', 'purple', 'darkorange', 'seagreen', 'royalblue', 'purple'],
     grid: {rows: 3, columns: 2, roworder: 'bottom to top', pattern: 'independent', ygap: 0.05},
     autosize: false, width: 1200, height: 1000,
     margin: {l: 25, r: 25, b: 10, t: 10, pad: 0},
     annotations: [
     {text: "Temperature", font: {size: 15, color: 'black'}, showarrow: false, align: 'center', x: 0.01, y: 1, xref: 'x1 domain', yref: 'y1 domain'},
     {text: "Humidity", font: {size: 15, color: 'black'}, showarrow: false, align: 'center', x: 0.01, y: 1, xref: 'x2 domain', yref: 'y2 domain'},
-    {text: "PM 2.5", font: {size: 15, color: 'black'}, showarrow: false, align: 'center', x: 0.01, y: 1, xref: 'x3 domain', yref: 'y3 domain'},
-    {text: "Brightness", font: {size: 15, color: 'black'}, showarrow: false, align: 'center', x: 0.01, y: 1, xref: 'x4 domain', yref: 'y4 domain'},
-    {text: "Magnetic X", font: {size: 15, color: 'black'}, showarrow: false, align: 'center', x: 0.01, y: 1, xref: 'x5 domain', yref: 'y5 domain'},
-    {text: "Magnetic Y", font: {size: 15, color: 'black'}, showarrow: false, align: 'center', x: 0.01, y: 1, xref: 'x6 domain', yref: 'y6 domain'}
+    {text: "0.3um particles", font: {size: 15, color: 'black'}, showarrow: false, align: 'center', x: 0.01, y: 1, xref: 'x3 domain', yref: 'y3 domain'},
+	{text: "1um particles", font: {size: 15, color: 'black'}, showarrow: false, align: 'center', x: 0.01, y: 1, xref: 'x4 domain', yref: 'y4 domain'},
+    {text: "Brightness", font: {size: 15, color: 'black'}, showarrow: false, align: 'center', x: 0.01, y: 1, xref: 'x5 domain', yref: 'y5 domain'},
+    {text: "Magnetic", font: {size: 15, color: 'black'}, showarrow: false, align: 'center', x: 0.01, y: 1, xref: 'x6 domain', yref: 'y6 domain'}
     ],
     xaxis1: {automargin: true, tickangle: 90, title: {standoff: 10, text: 'Time', font: {family: 'Arial, Helvrtica, sans-serif', size: 15, color: '#000000'}}, zeroline: false, showgrid: false, showline: true, showticklabels: true, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',},
     xaxis2: {automargin: true, tickangle: 90, title: {standoff: 10, text: 'Time', font: {family: 'Arial, Helvrtica, sans-serif', size: 15, color: '#000000'}}, zeroline: false, showgrid: false, showline: true, showticklabels: true, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',},
@@ -629,14 +675,14 @@ var layout = {
     xaxis6: {zeroline: false, showgrid: false, showline: true, showticklabels: false, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',},
     yaxis1: {automargin: true, title: {standoff: 10, text: '°C', font: {family: 'Arial, Helvrtica, sans-serif', size: 15, color: '#000000'}}, zeroline: false, showgrid: false, showline: true, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',},
     yaxis2: {automargin: true, title: {standoff: 10, text: '%', font: {family: 'Arial, Helvrtica, sans-serif', size: 15, color: '#000000'}}, zeroline: false, showgrid: false, showline: true, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',},
-    yaxis3: {automargin: true, title: {standoff: 10, text: 'μg/m³', font: {family: 'Arial, Helvrtica, sans-serif', size: 15, color: '#000000'}}, zeroline: false, showgrid: false, showline: true, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',},
-    yaxis4: {automargin: true, title: {standoff: 10, text: 'lux', font: {family: 'Arial, Helvrtica, sans-serif', size: 15, color: '#000000'}}, zeroline: false, showgrid: false, showline: true, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',},
-    yaxis5: {automargin: true, title: {standoff: 10, text: 'mT', font: {family: 'Arial, Helvrtica, sans-serif', size: 15, color: '#000000'}}, zeroline: false, showgrid: false, showline: true, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',},
-    yaxis6: {automargin: true, title: {standoff: 10, text: 'mT', font: {family: 'Arial, Helvrtica, sans-serif', size: 15, color: '#000000'}}, zeroline: false, showgrid: false, showline: true, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',}
+    yaxis3: {automargin: true, title: {standoff: 10, text: '/0.1L', font: {family: 'Arial, Helvrtica, sans-serif', size: 15, color: '#000000'}}, zeroline: false, showgrid: false, showline: true, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',},
+	yaxis4: {automargin: true, title: {standoff: 10, text: '/0.1L', font: {family: 'Arial, Helvrtica, sans-serif', size: 15, color: '#000000'}}, zeroline: false, showgrid: false, showline: true, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',},
+    yaxis5: {automargin: true, title: {standoff: 10, text: 'lux', font: {family: 'Arial, Helvrtica, sans-serif', size: 15, color: '#000000'}}, zeroline: false, showgrid: false, showline: true, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',},
+    yaxis6: {automargin: true, title: {standoff: 10, text: 'uT', font: {family: 'Arial, Helvrtica, sans-serif', size: 15, color: '#000000'}}, zeroline: false, showgrid: false, showline: true, linecolor: 'black', linewidth: 2, ticks: 'inside', tickfont: 'font_dict', mirror: 'allticks', tickwidth: 2, tickcolor: 'black',}
     };
 
 let numPlots = 8;
-let numRooms = 3;
+let numRooms = 4;
 let placement = 0;
 let tm = end - range;
 let tmstmp = "";
@@ -668,8 +714,11 @@ var updatePlot = function(data_records) {
       case "node1":
         placement = 1;
         break;
-      case "node5":
+      case "node2":
         placement = 2;
+        break;
+	case "node5":
+        placement = 3;
         break;
       default:
         placement = -1;
@@ -678,16 +727,22 @@ var updatePlot = function(data_records) {
     if (placement == -1) {
       break;
     }
-    const updatelist = ["temperature", "humidity", "pm2_5", "lux", "magnetic_x", "magnetic_y"];
+    const updatelist = ["temperature", "humidity", "num_particles_0_3_um", "num_particles_1_um", "lux", "magnetic"];
     for (let item in updatelist) {
       if (data_records[i][keys.indexOf(updatelist[item])] != -1) {
         let pushpoint = data_records[i][keys.indexOf(updatelist[item])];
         if (updatelist[item] == "temperature") {
-          pushpoint -= 273.15;
-        }
-        if (updatelist[item] == "humidity") {
-          pushpoint *= 100;
-        }
+          pushpoint = data_records[i][keys.indexOf(updatelist[item])] - 273.15;
+        } else if (updatelist[item] == "humidity") {
+          pushpoint = data_records[i][keys.indexOf(updatelist[item])] * 100;
+        } else if (updatelist[item] == "magnetic") {
+			let x = data_records[i][keys.indexOf("magnetic_x")];
+			let y = data_records[i][keys.indexOf("magnetic_y")];
+			let z = data_records[i][keys.indexOf("magnetic_z")];
+			pushpoint = Math.sqrt(x * x + y * y + z * z);
+		} else {
+			pushpoint = data_records[i][keys.indexOf(updatelist[item])];
+		}
         g_plot_data[placement].y.push(pushpoint);
         g_plot_data[placement].x.push(tmstmp);
       }
@@ -710,6 +765,8 @@ function changeInterval(btn) {
     btn1d.classList.add("intv");
     btn1w.classList.remove("clkdintv");
     btn1w.classList.add("intv");
+    btn4w.classList.remove("clkdintv");
+    btn4w.classList.add("intv");
     switch (btn) {
         case "5m":
             target = btn5m;
@@ -726,6 +783,10 @@ function changeInterval(btn) {
         case "1w":
             range = 7 * 24 * 60 * 60;
             target = btn1w;
+            break;
+        case "4w":
+            range = 30 * 24 * 60 * 60;
+            target = btn4w;
             break;
     }
     target.classList.add("clkdintv");
@@ -799,115 +860,3 @@ function newUser() {
     return false;
 }
 // New Location/User
-
-
-
-
-
-      /* exported gapiLoaded */
-      /* exported gisLoaded */
-      /* exported handleAuthClick */
-      /* exported handleSignoutClick */
-
-      // TODO(developer): Set to client ID and API key from the Developer Console
-      const CLIENT_ID = "968225988580-1r4j1b3ooh2s6vn6k41gac4a4idbjkrn.apps.googleusercontent.com";
-      const API_KEY = "AIzaSyDyXKIvKG94DNfUX9JRPJJ9U6RG0EwIEsI";
-
-      // Discovery doc URL for APIs used by the quickstart
-      const DISCOVERY_DOC = "https://sheets.googleapis.com/$discovery/rest?version=v4";
-
-      // Authorization scopes required by the API; multiple scopes can be
-      // included, separated by spaces.
-      const SCOPES = "https://www.googleapis.com/auth/spreadsheets.readonly";
-
-      let tokenClient;
-
-      /**
-       * Callback after api.js is loaded.
-       */
-      function gapiOnLoadHandler() {
-        gapi.load("client", async function() {
-          await gapi.client.init({
-            apiKey: API_KEY,
-            discoveryDocs: [DISCOVERY_DOC],
-          });
-        });
-      }
-
-      /**
-       * Callback after Google Identity Services are loaded.
-       */
-      function gisOnLoadHandler() {
-        tokenClient = google.accounts.oauth2.initTokenClient({
-          client_id: CLIENT_ID,
-          scope: SCOPES,
-          callback: "", // defined later
-        });
-      }
-
-      search_btn_dom.addEventListener("click", async function() {
-        if (!gapi.client) return
-        console.log(gapi.client.getToken())
-          await listMajors();
-        // tokenClient.callback = async (resp) => {
-        //   if (resp.error !== undefined) {
-        //     throw (resp);
-        //   }
-        //   await listMajors();
-        // };
-        // if (gapi.client.getToken() === null) {
-        //   // Prompt the user to select a Google Account and ask for consent to share their data
-        //   // when establishing a new session.
-        //   tokenClient.requestAccessToken({prompt: "consent"});
-        // } else {
-          
-        //   // Skip display of account chooser and consent dialog for an existing session.
-        //   tokenClient.requestAccessToken({prompt: ""});
-        // }
-      });
-
-      /**
-       *  Sign out the user upon button click.
-       */
-      function handleSignoutClick() {
-        const token = gapi.client.getToken();
-        if (token !== null) {
-          google.accounts.oauth2.revoke(token.access_token);
-          gapi.client.setToken("");
-          document.getElementById('content').innerText = '';
-          document.getElementById('authorize_button').innerText = 'Authorize';
-          document.getElementById('signout_button').style.visibility = 'hidden';
-        }
-      }
-
-      /**
-       * Print the names and majors of students in a sample spreadsheet:
-       * https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
-       */
-      async function listMajors() {
-        let response;
-        try {
-          // Fetch first 10 files
-          response = await gapi.client.sheets.spreadsheets.values.get({
-            spreadsheetId: '1Lsk2p7Jz0Ul2nC2Y4gxID0TZXlIJPO0zi0HwbjfiDKo',
-            range: 'PublicStorage!A1:J',
-          });
-        } catch (err) {
-            list_itself_dom.innerText = err.message;
-          return;
-        }
-        const range = response.result;
-        if (!range || !range.values || range.values.length == 0) {
-            list_itself_dom.innerText = 'No values found.';
-          return;
-        }
-        // Flatten to string to display
-        const output = range.values;
-        console.log(range)
-        list_itself_dom.innerHTML = "";
-        for (let i in range.values) {
-          let row = range.values[i];
-          list_itself_dom.innerHTML += "<p>" + row + "</p>";
-        }
-        
-      }

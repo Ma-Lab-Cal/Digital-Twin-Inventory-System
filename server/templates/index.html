@@ -32,12 +32,21 @@
 								<option value="Pre Lab">Pre Lab</option>
 								<option value="Office">Office</option>
 							</select>
+						<label for="User" id="usrslcttag">Current User:</label>
+							<select name="Username" id="userslct" onchange="newUser()">
+								<option value="">Please Select ...</option>
+								<option value="Student 1">Student 1</option>
+								<option value="Student 2">Student 2</option>
+								<option value="Student 3">Student 3</option>
+								<option value="new">... New User</option>
+							</select>
 
 						<!-- <button type="button" class="back" onclick="return changeImage('/static/img/Plan 01.png')">Back</button> -->
-
+						
 						<img src="/static/img/user.png" class="user">
 						<img src="/static/img/Plan 00.png" class="map"> <!-- change the default floor plan image here -->
-						<!-- <canvas id="myCanvas" width="1170" height="1140" style="border:1px solid #FF0000;"></canvas> -->
+						<canvas id="myCanvas" width="850" height="1000"></canvas>
+						
 
 					</div> <!-- flrPlan -->
 
@@ -48,17 +57,19 @@
 						<h1>Equipment List</h1>
 
 						<form action="process.php" method="POST">
-							<input type="search" name="search" placeholder="Search..." id="searchbar">
+							<input type="search" name="search" placeholder="Search..." id="searchbar" onkeyup="onSearchHandler()">
 							<button type="button" class="search" id="search_btn_dom">🔍</button>
-							<div id="autofill" class="dropDownList" onmouseover="this.style.overflow='auto'" onmouseout="this.style.overflow='hidden'"></div> <!-- the logic to hide scrolling bar if not hovered -->
+							<!-- <div id="autofill" class="dropDownList" onmouseover="this.style.overflow='auto'" onmouseout="this.style.overflow='hidden'"></div> the logic to hide scrolling bar if not hovered -->
+
+							<div id="list_itself_dom" class="dropDownList" onmouseover="this.style.overflow='auto'" onmouseout="this.style.overflow='hidden'">
+								Test
+							</div>
+
 						</form> <!-- searchbar -->
 
 						<button type="button" class="add" onclick="addEqp()">Add</button>
 						<button type="button" class="edit" onclick="editEqp()">Edit</button>
 						
-						<div id="list_itself_dom">
-							Test
-						</div>
 						<!-- <form id="it">
 							<h1 class="title">No object selected!</h1>
 							<p>Key:</p>
@@ -75,19 +86,19 @@
 						</form> it -->
 
 						<form id="eqpInfo">
-							<label for="User">Current User:</label>
-							<select name="Username" id="userEnter" onchange="newUser()">
-								<option value="">Please Select ...</option>
-								<option value="Student 1">Student 1</option>
-								<option value="Student 2">Student 2</option>
-								<option value="Student 3">Student 3</option>
-								<option value="new">... New User</option>
-							</select>
-							<p>Name:</p>
-							<p class="title">No object selected!</p>
-							<p>Locations:</p>
-							<p type="text" id="uri"></p>
-							<p type="text" id="qty"></p>
+							<div class="modual">
+								<p class="piece">Name:</p>
+								<p class="piece" id="ttl">No object selected!</p>
+							</div>
+							<div class="modual">
+								<p class="piece">Locations:</p>
+								<p class="piece" type="text" id="uri"></p>
+							</div>
+							<div class="modual">
+								<p class="piece">Total Count:</p>
+								<p class="piece" type="text" id="qty"></p>
+							</div>
+							
 							<div id="locationlist"></div>
 							<div class="desys">
 								<div class="decol"><button type="button" class="take">Take</button></div>
@@ -102,7 +113,7 @@
 								<div class="amcol"><input type="text" name="Move" id="moveAM"></div>
 								<div class="amcol"><button type="button" class="all">All</button></div>
 								<div class="amcol2">from</div>
-								<!-- <div class="amcol"><input type="text" name="Move" id="moveFROM"></div> -->
+								
 								<select name="Location" class="amcol4" onchange="newLocationA()">
 									<option value="">Select ...</option>
 									<option value="Location 0">Location 0</option>
@@ -111,7 +122,7 @@
 									<option value="new">... New</option>
 								</select>
 								<div class="amcol3">to</div>
-								<!-- <div class="amcol"><input type="text" name="Move" id="moveTO"></div> -->
+								
 								<select name="Location" class="amcol4" onchange="newLocationA()">
 									<option value="">Select ...</option>
 									<option value="Location 0">Location 0</option>
@@ -120,63 +131,88 @@
 									<option value="new">... New</option>
 								</select>
 							</div>
-							<p>Key:</p>
-							<p type="text" id="sku"></p>
-							<p>Tags:</p>
-							<p type="text" id="tag"></p>
-							<p>Description:</p>
-							<p type="text" id="des"></p>
+
+							<div class="modual">
+								<p class="piece">Key:</p>
+								<p class="piece" type="text" id="sku"></p>
+							</div>
+							<div class="modual">
+								<p class="piece">Tags:</p>
+								<p class="piece" type="text" id="tag"></p>
+							</div>
+							<div class="modual">
+								<p>Description:</p>
+								<p type="text" id="des"></p>
+							</div>
 							<br>
 						</form> <!-- eqpInfo -->
 
 						<form id="editInfo">
-							<label for="Name">Name:</label>
-							<input type="text" name="Name" class="objTitle" id="nameinfo">
-							<label for="ID">Key:</label>
-							<p type="text" name="Key" id="skuInfo"></p>
-							<label for="Location">Location:</label>
-							<!-- <input type="text" name="Location" id="uriInfo"> -->
-
-							<select name="Location" id="uriInfo" onchange="newLocationE()">
-								<option value="">Please Select ...</option>
-								<option value="Location 0">Location 0</option>
-								<option value="Location 1">Location 1</option>
-								<option value="Location 5">Location 5</option>
-								<option value="new">... New Location</option>
-							</select>
-
-							<label for="Quantity">Quantity:</label>
-							<input type="text" name="Quantity" id="qtyInfo">
-							<label for="Tags">Tags:</label>
-							<input type="text" name="Tags" id="tagInfo">
-							<label for="Description">Description:</label>
-							<textarea type="text" name="Description" id="desInfo"></textarea>
+							<div class="modual">
+								<label class="piece" for="Name">Name:</label>
+								<input class="piece" type="text" name="Name" class="objTitle" id="nameinfo">
+							</div>
+							<div class="modual">
+								<label class="piece">Key:</label>
+								<p class="piece" type="text" name="Key" id="skuInfo"></p>
+							</div>
+							<div class="modual">
+								<label id="locE" for="Location">Location:</label>
+								<select name="Location" id="uriInfo" onchange="newLocationE()">
+									<option value="">Please Select ...</option>
+									<option value="Location 0">Location 0</option>
+									<option value="Location 1">Location 1</option>
+									<option value="Location 5">Location 5</option>
+									<option value="new">... New Location</option>
+								</select>
+							</div>
+							<div class="modual">
+								<label class="piece" for="Quantity">Quantity:</label>
+								<input class="piece" type="text" name="Quantity" id="qtyInfo">
+							</div>
+							<div class="modual">
+								<label class="piece" for="Tags">Tags:</label>
+								<input class="piece" type="text" name="Tags" id="tagInfo">
+							</div>
+							<div class="modual">
+								<label class="piece" for="Description">Description:</label>
+								<textarea class="piece" type="text" name="Description" id="desInfo"></textarea>
+							</div>
 							<button class="submit" type="button" onclick="editEvent();">Confirm</button>
 							<button class="delete" type="button" onclick="">Delete</button>
 						</form> <!-- editInfo -->
 
 						<form id="addInfo">
-							<label for="Name">Name:</label>
-							<input type="text" name="Name" id="addname">
-							<label for="ID">Key:</label>
-							<input type="text" name="Key" id="addsku">
-							<label for="Location">Location:</label>
-							<!-- <input type="text" name="Location" id="adduri"> -->
-
-							<select name="Location" id="adduri" onchange="newLocationA()">
-								<option value="">Please Select ...</option>
-								<option value="Location 0">Location 0</option>
-								<option value="Location 1">Location 1</option>
-								<option value="Location 5">Location 5</option>
-								<option value="new">... New Location</option>
-							</select>
-
-							<label for="Quantity">Quantity:</label>
-							<input type="text" name="Quantity" id="addqty">
-							<label for="Tags">Tags:</label>
-							<input type="text" name="Tags" id="addtag">
-							<label for="Description">Description:</label>
-							<textarea type="text" name="Description" id="adddes"></textarea>
+							<div class="modual">
+								<label class="piece" for="Name">Name:</label>
+								<input class="piece" type="text" name="Name" id="addname">
+							</div>
+							<div class="modual">
+								<label class="piece" for="ID">Key:</label>
+								<input class="piece" type="text" name="Key" id="addsku">
+							</div>
+							<div class="modual">
+								<label id="locA" for="Location">Location:</label>
+								<select name="Location" id="adduri" onchange="newLocationA()">
+									<option value="">Please Select ...</option>
+									<option value="Location 0">Location 0</option>
+									<option value="Location 1">Location 1</option>
+									<option value="Location 5">Location 5</option>
+									<option value="new">... New Location</option>
+								</select>
+							</div>
+							<div class="modual">
+								<label class="piece" for="Quantity">Quantity:</label>
+								<input class="piece" type="text" name="Quantity" id="addqty">
+							</div>
+							<div class="modual">
+								<label class="piece" for="Tags">Tags:</label>
+								<input class="piece" type="text" name="Tags" id="addtag">
+							</div>
+							<div class="modual">
+								<label class="piece" for="Description">Description:</label>
+								<textarea class="piece" type="text" name="Description" id="adddes"></textarea>
+							</div>
 							<button class="submit" type="button" onclick="addEvent();">Confirm</button>
 						</form> <!-- addInfo -->
 
@@ -191,6 +227,7 @@
 						<button class="clkdintv" type="button" id="btn1h" onclick="changeInterval ('1h')">1 hrs</button>
 						<button class="intv" type="button" id="btn1d" onclick="changeInterval ('1d')">1 day</button>
 						<button class="intv" type="button" id="btn1w" onclick="changeInterval ('1w')">1 week</button>
+						<button class="intv" type="button" id="btn4w" onclick="changeInterval ('4w')">1 month</button>
 
 						<div id="chart_loading_blocker" class="urap-loader"></div>
 						<div id="chart" class="plots"></div>

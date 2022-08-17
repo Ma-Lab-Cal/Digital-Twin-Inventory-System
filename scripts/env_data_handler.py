@@ -83,9 +83,9 @@ structure = [
     ["node",        "TINYTEXT NOT NULL"],
     ["temperature", "DOUBLE"], 
     ["humidity",    "DOUBLE"],
-    ["pm1_0",       "DOUBLE"],
-    ["pm2_5",       "DOUBLE"],
-    ["pm10",        "DOUBLE"],
+    ["num_particles_0_3_um",    "DOUBLE"],
+    ["num_particles_1_um",      "DOUBLE"],
+    ["num_particles_10_um",     "DOUBLE"],
     ["magnetic_x",  "DOUBLE"],
     ["magnetic_y",  "DOUBLE"],
     ["magnetic_z",  "DOUBLE"],
@@ -106,7 +106,7 @@ while True:
         continue
     
     data = buffer.decode()
-
+    print(data)
     try:
         data = json.loads(data)
     except:

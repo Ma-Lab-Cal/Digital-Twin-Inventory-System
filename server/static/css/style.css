@@ -1,7 +1,14 @@
 /*Canvas*/
-canvas{
-  position: absolute;
+/* canvas{
+  position: relative;
+  display: none;
   top: 30;
+  left: 3vw;
+} */
+
+#myCanvas{
+  position: absolute;
+  top: 10vh;
   left: 3vw;
 }
 /*Canvas*/
@@ -245,7 +252,7 @@ footer{
   border-top-style: solid;
   border-top-width: 1px;
   border-top-color: midnightblue;
-  max-height: 75vh;
+  max-height: 40vh;
   overflow: hidden;
 }
 
@@ -402,11 +409,27 @@ button.back:active{
   margin-bottom: 10px;
   margin-right: 5px;
 }
+
+#usrslct{
+  margin-bottom: 10px;
+}
+
+#usrslcttag{
+  margin-bottom: 10px;
+  margin-right: 5px;
+  margin-left: 5%;
+}
 /*Floor Plan*/
 
 
 
 /*Equipment List*/
+.piece{
+  display: inline-block;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
 #eqpList{
   padding: 10px;
 }
@@ -647,7 +670,7 @@ button.delete:active{
 }
 
 #editInfo label{
-  display: block;
+  display: inline-block;
   padding-bottom: 5px;
 }
 
@@ -656,7 +679,7 @@ form#editInfo{
   margin-top: 50px;
 }
 
-#eqpInfo{
+#addInfo{
   padding-top: 10px;
   display: block;
   padding-left: 20px;
@@ -664,12 +687,12 @@ form#editInfo{
   background: whitesmoke;
 }
 
-#eqpInfo label{
-  display: block;
+#addInfo label{
+  display: inline-block;
   padding-bottom: 5px;
 }
 
-form#eqpInfo{
+form#addInfo{
   position: relative;
   margin-top: 50px;
 }
@@ -683,13 +706,21 @@ form#eqpInfo{
 }
 
 #eqpInfo label{
-  display: block;
+  display: inline-block;
   padding-bottom: 5px;
 }
 
 form#eqpInfo{
   position: relative;
   margin-top: 50px;
+}
+
+#locA{
+  margin-right: 5px;
+}
+
+#locE{
+  margin-right: 5px;
 }
 /*Equipment List*/
 
@@ -775,7 +806,7 @@ form#plotFunc{
 }
 
 #End {
-  margin-left: 1%;
+  font-size: 20px;
   margin-right: 1%;
 }
 
@@ -826,13 +857,13 @@ button#download:active{
 button.intv{
   margin-bottom: 10px;
   height: 30px;
-  width: 25%;
+  width: 20%;
   padding: 5px;
   background: beige;
   font-size: 20px;
   border: none;
   cursor: pointer;
-  margin-left: 1%;
+  margin-left: 0.5%;
   margin-right: 1%;
 }
 
@@ -847,13 +878,13 @@ button.intv:active{
 button.clkdintv{
   margin-bottom: 10px;
   height: 30px;
-  width: 25%;
+  width: 20%;
   padding: 5px;
   background: tomato;
   font-size: 20px;
   border: none;
   cursor: pointer;
-  margin-left: 1%;
+  margin-left: 0.5%;
   margin-right: 1%;
 }
 
@@ -866,7 +897,7 @@ button.clkdintv:active{
 }
 
 button#btn5m{
-margin-left: -9%;
+margin-left: -9.5%;
 }
 /*Environmental Plot*/
 
@@ -895,8 +926,8 @@ margin-left: -9%;
   width: 150px;
   height: 150px;
   position: absolute;
-  left: 77.5%;
-  top: 45%;
+  left: 3000px;
+  top: 1000px;
   z-index:12;
   border: 16px solid lavender;
   border-top: 16px solid thistle;
